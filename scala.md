@@ -4,7 +4,7 @@
 
 ```
 学习记录：
-20241224：001-52 53开始看
+20241224：001-55 56开始看
 
 
 
@@ -43,11 +43,11 @@ scala 2.12
 
 Scala和Java及JVM之间的关系如下图：
 
-![](.\scala_image\s3.png)
+![](scala_image\s3.png)
 
 通过scalac编译scala文件生成两个字节码文件
 
-![](.\scala_image\s4.png)
+![](scala_image\s4.png)
 
 
 
@@ -179,7 +179,7 @@ public class Student {
 
 
 
-![](.\scala_image\s5.png)
+![](scala_image\s5.png)
 
 认真反思对比 为什么出现伴生对象伴生类，其实是为了替代java中的static关键字
 
@@ -373,7 +373,7 @@ Nothing是所有数据类型的子类，主要用在一个函数没有明确返�
 
 
 
-![](.\scala_image\s6.png)
+![](scala_image\s6.png)
 
 
 
@@ -502,7 +502,7 @@ def sum(x: Int ,y: Int):Int = {
 }
 ```
 
-![](.\scala_image\s7.png)
+![](scala_image\s7.png)
 
 类中的函数称为方法。
 
@@ -610,7 +610,104 @@ def testFun_5(name: String): String = name
 
 ### 5.2 函数高级
 
-#### 5.2.1 匿名函数
+#### 5.2.1 高阶函数
+
+在scala中，函数是一等公民。可以定义、调用函数。
+
+函数可以作为 **值/参数/返回值** 传递[看下边]
+
+
+
+以下代码为函数作为**值**进行传递：
+
+```
+package scala.chapter05
+
+object Test06_HighOrderFunction {
+
+  def main(args: Array[String]): Unit = {
+
+    def f(n:Int):Int={
+      println("f调用")
+      n + 1
+    }
+
+    val res = f(3)
+    println(res)
+
+    // 函数作为值进行传递
+    val f1 = f _ //这种表示，f _ 代表函数整体，而不是调用函数
+    val f2: Int=>Int = f //这里效果同上
+    println(f2(3))
+    println(f1)
+    println(f2)
+  }
+}
+
+```
+
+以下代码为函数作为**参数**进行传递：
+
+```scala
+package scala.chapter05
+
+object Test06_HighOrderFunction2 {
+
+  def main(args: Array[String]): Unit = {
+
+    def dualEval(op:(Int, Int)=>Int,a:Int, b:Int):Int = {
+      op(a,b)
+    }
+
+    def op_add(a:Int, b:Int):Int = {
+      a + b
+    }
+
+    print(dualEval(op_add,4,6))
+    // 注意这里不是print(dualEval(op_add(),4,6))会报错
+    val op_add_2 = op_add _
+    print(dualEval(op_add_2,4,6))
+  }
+}
+
+```
+
+以下代码为函数作为函数的**返回值**进行传递：
+
+```scala
+package scala.chapter05
+
+object Test06_HighOrderFunction3 {
+
+  def main(args: Array[String]): Unit = {
+
+    def f5(): Int=>Unit = {
+      def f6(a:Int):Unit = {
+        println("function f6 called, return :" + a)
+      }
+      f6
+      // 或者写 f6 _
+    }
+    println(f5())
+    f5()(7)
+  }
+}
+
+```
+
+
+
+
+
+
+
+
+
+#### 5.2.2 匿名函数
+
+定义：没有名字的函数就是匿名函数。
+
+定义格式如下：`(x:Int)=>{函数体}`
 
 应用场景如下
 
@@ -645,6 +742,62 @@ object Test05_Lambda {
 - 类型省略后，如果只有一个参数，则圆括号也可以省略
 - 匿名函数如果只有一行，则大括号也可以省略
 - 如果参数只出现一次，则参数省略且后面参数可以用_代替
+
+
+
+上边代码通过至简原则可以简化为：
+
+```scala
+package scala.chapter05
+
+object Test05_Lambda {
+
+  def main(args: Array[String]): Unit = {
+
+    val fun = (name:String) => { println(name) }
+    fun("Ryze")
+
+    // 函数作为参数
+    def f(func : String => Unit) : Unit = {
+      func("atguigu")
+    }
+    f(fun)
+    //直接替换fun
+    f((name:String) => { println(name) })
+    // 至简原则后
+    //  1.其实前边已经定义好这个参数类型，可以省略
+    f((name) => { println(name) })
+    //  2.只有一个参数，括号可以省略
+    f(name => { println(name) })
+    //  3.匿名函数只有一行，大括号可以省略
+    f(name => println(name))
+    //  4.如果参数只出现一次，则参数省略且后面参数可以使用_代替
+    f(println(_))
+    //  5.如果可以推断出当前传入的println是一个函数体，而不是调用函数，则可以直接省略下划线
+    f(println)
+
+
+    //  实例
+    def FunctionOneAndTwo(fun:(Int,Int)=>Int):Int = {
+      fun(1,2)
+    }
+
+    val f_add = (a:Int,b:Int) => a+b
+    val f_minus = (a:Int,b:Int) => a-b
+
+    println(FunctionOneAndTwo(f_add))
+    // 先省略参数类型 然后参数只出现一次，下划线替代
+    println(FunctionOneAndTwo((a,b) => a+b))
+    println(FunctionOneAndTwo( _ - _ )) // 这里是a-b b-a呢？
+    println(FunctionOneAndTwo( -_ + _ )) // 这里是-a+b = b-a
+  }
+}
+
+```
+
+
+
+
 
 
 
