@@ -4,8 +4,8 @@
 
 ```
 学习记录：
-20241224：001-55 56开始看
-
+20241224：001-57 58开始看
+20241226： -74 75开始看
 
 
 跳过的部分[28,47]
@@ -697,7 +697,33 @@ object Test06_HighOrderFunction3 {
 
 
 
+```scala
+package scala.chapter05
 
+object Test07_Practice_CollectionOperation {
+
+  def main(args: Array[String]): Unit = {
+
+    // 对数组进行处理，将操作抽象出来，处理完毕之后的结果返回一个新的数组
+
+    def arrayOp(array:Array[Int],op:Int => Int):Array[Int] = {
+      for (elem <- array) yield  op(elem)
+    }
+
+    val arr:Array[Int] = Array(10,20,30)
+    def addOne(elem:Int):Int = {
+      elem+1
+    }
+
+    val res = arrayOp(arr, addOne)
+    println(res.mkString(","))
+
+    val res2 = arrayOp(arr,_ *2)
+    println(res2.mkString(","))
+  }
+}
+
+```
 
 
 
@@ -797,11 +823,569 @@ object Test05_Lambda {
 
 
 
+#### 5.2.4 函数的柯里化&闭包
+
+闭包：函数式编程的标配
+
+闭包：如果一个函数，访问到了它的外部(局部)变量的值，那么这个函数和他所处的环境，称为闭包
+
+函数柯里化：把一个参数列表的多个参数，变成多个参数列表。
+
+请查看下边代码：
+
+```scala
+package scala.chapter05
+
+object Test08_Practice2 {
+
+  def main(args: Array[String]): Unit = {
+
+    def fun(i:Int):String=>(Char=>Boolean) = {
+      def f1(s:String):Char=>Boolean = {
+        def f2(c:Char):Boolean = {
+          if(i==0 && s == "" && c == '0') false else true
+        }
+        f2
+      }
+      f1
+    }
+    println(fun(0)("")('0'))
+  }
+}
+```
+
+
+
+函数调用在栈stack内存
+
+对象实例的保存在堆heap内存，对象实例把相关的依赖的外部环境和局部变量保存在对象实例中，这就是闭包。所以不会导致依赖的外部环境丢失的情况。
+
+以下为**闭包**的应用示例代码：
+
+```scala
+package scala.chapter05
+
+object Test09_ClosureAndCurrying {
+
+  def main(args: Array[String]): Unit = {
+
+    def add(a:Int, b:Int):Int = {
+      a + b
+    }
+
+    // 1.考虑固定一个加数的场景 4+b
+    def addByFour(b:Int): Int = {
+      4 + b
+    }
+    // 2.扩展固定加数改变的情况
+
+    // 3.将固定的加数作为另一个参数传入，但是作为第一层传入 add()()
+    def addByFour1():Int=>Int = {
+      val a = 4
+      def addB(b:Int):Int = {
+      a + b
+      }
+      addB
+    }
+
+    def addBya(a:Int): Int => Int = {
+      def addB(b: Int): Int = {
+        a + b
+      }
+      addB
+    }
+
+    // 以上两个就是闭包，内层函数用到了外部的局部变量/参数
+    println(addBya(11)(99))
+
+    // addBya转化为lambda表达式
+    def addBya1(a:Int):Int=>Int = {
+      (b:Int) =>{a+b}
+    }
+    // 继续至简
+    def addBya2(a: Int): Int => Int = {
+      b => a + b
+    }
+  }
+}
+```
+
+以下为**柯里化**的应用示例代码：
+
+如果用到了柯里化表达，底层一定是用到了闭包
+
+```scala
+package scala.chapter05
+
+object Test09_addCurrying {
+
+  def main(args: Array[String]): Unit = {
+    
+    def addCurrying(a:Int)(b:Int): Int = {
+      a + b
+    }
+  }
+}
+```
+
+
+
+#### 5.2.5 递归
+
+> 注意一定要有跳出的逻辑
+>
+> scala中递归必须声明函数返回值类型
+
+经典案例阶乘代码如下：
+
+```
+package scala.chapter05
+
+object Test10_digui_jiecheng {
+
+  def main(args: Array[String]): Unit = {
+
+    def digui(n:Int):Int = {
+      if (n<0)
+        return -1
+      if (n == 0)
+        1
+      else
+        digui(n-1)*n
+    }
+
+    print(digui(4))
+  }
+}
+
+```
+
+**递归的缺点**：StackWorkFlow 耗费更多的栈空间资源。
+
+**尾递归**：节省资源
+
+尾递归示例代码如下：
+
+```scala
+package scala.chapter05
+
+import scala.annotation.tailrec
+
+object Test10_TailRecursion {
+
+  def main(args: Array[String]): Unit = {
+    
+    def tailFact(n:Int):Int = {
+      
+      @tailrec
+      def loop(n:Int,currRes:Int):Int = {
+        if (n == 0)
+          return currRes
+        else
+          loop(n-1,currRes*n)
+      }
+      loop(n,1)
+    }
+
+    println(tailFact(4))
+  }
+}
+
+// 尾递归代码使用@tailrec注解，可以保证为尾递归。
+```
+
+
+
+#### 5.2.6 控制抽象
+
+主要是针对函数参数而言
+
+```scala
+package scala.chapter05
+
+object TestControl {
+
+  def main(args: Array[String]): Unit = {
+
+
+  }
+
+  // 这里是值调用，把计算后的值传递过去  - 传值参数
+  def f0(a:Int):Unit = {
+    println(a)
+  }
+
+  def f1(a:Int):Int = {
+    println(a)
+    a
+  }
+  // 名调用，把代码传递过去 - 传名参数
+  // a: =>Int 注意这里 =>Int 表示代码块，没有输出，返回值为int
+  // 这里传递不是具体的值而是代码块
+  def f2(a: =>Int):Unit = {
+    println("a is :" + a)
+  }
+
+  f2(23)
+  f2(f1(10))
+}
+
+```
+
+实现while循环的示例代码如下：
+
+```scala
+package scala.chapter05
+
+object Test12_MyWhile {
+
+  def main(args: Array[String]): Unit = {
+
+    // 用闭包实现一个函数，将代码块作为参数传入，递归调用
+    def myWhile(condition: =>Boolean):(=>Unit)=>Unit = {
+
+      def doLoop(op: => Unit):Unit = {
+        if (condition){
+          op
+          myWhile(condition)(op)
+        }
+      }
+      doLoop _
+    }
+  }
+}
+
+```
+
+
+
+#### 5.2.7 惰性加载 -lazy
+
+当函数返回值被声明为lazy时，函数的执行将被推迟，知道我们首次对此取值，该函数才会执行，我们称之为惰性函数。
+
+示例代码如下：
+
+```scala
+package scala.chapter05
+
+object Test13_LazyFun {
+
+  def main(args: Array[String]): Unit = {
+
+    // val temp = sum(11,22)
+    // 注意这里加上lazy注释，对比和没加的区别
+    lazy val temp = sum(11,22)
+    println("--------")
+    println("temp is : " + temp)
+  }
+
+  def sum(i:Int, j:Int):Int = {
+    println("function sum execute ... ")
+    i + j
+  }
+}
+
+```
 
 
 
 
-6 面向对象
+
+
+
+## 6 面向对象
+
+
+
+### 6.1 包
+
+package 包名
+
+命名规则：只能包含数字、字母、下划线、小圆点 但不能用数字开头，也不要使用关键字。
+
+一般是：com.company.project.hexin
+
+两种包管理风格：
+
+- 与java类似，每个源文件一个包，包名用'.'分割表示包的层级关系。如：com.atguigu.scala
+- 另一种是通过嵌套风格，下边这种风格特点如下：一个源文件中可以声明多个package，子包中的类可以直接访问父包中的内容，无需导包。
+
+```scala
+// 用嵌套风格定义包
+package com{
+
+  object Outer{
+    var out:String  = "out"
+  }
+
+  package atguigu{
+    package scala{
+      object Inner{
+
+        def main(args: Array[String]): Unit = {
+          // 可以直接访问外层包的对象
+          println(Outer.out)
+        }
+
+        def fun():Unit = {
+          println("fun begin execute")
+        }
+      }
+    }
+  }
+}
+
+
+// 可以定义多个包层级
+package aaa{
+  package bbb{
+    package ccc{
+      import com.atguigu.scala.Inner
+
+      object Test01_o{
+        def main(args: Array[String]): Unit = {
+          Inner.fun()
+        }
+      }
+    }
+  }
+}
+```
+
+
+
+
+
+#### 6.1.3 包对象
+
+在scala中可以为每个包定义一个同名的包对象，定义在包对象中的成员，作为其对应包下所有的class和object的共享变量，可以被直接访问。
+
+IDEA中可以直接创建：
+
+![](scala_image\s8.png)
+
+
+
+包对象示例代码如下：
+
+```scala
+package scala
+
+package object chapter06 {
+
+  // 定义当前包共享的属性和方法
+  val commanValue = "auserwn"
+  def commonMethod():Unit = {
+    println("commonMethod start execute ... ")
+  }
+}
+
+// 通过这个定义，那么包chapter06 下的所有类都可以访问当前的属性commanValue 和 方法commonMethod
+```
+
+
+
+#### 6.1.4 导包
+
+和java一样。
+
+- 局部导入：在其作用范围内可用
+- 通配符导入：import java.util._
+- 给类起名：import java.util.{ArrayList=>JL}
+- 一下导入多个：import java.util.{HashSet,ArrayList}
+- 屏蔽类：import java.util.{ArrayList=> _ , _ }
+- scala中默认导入
+
+
+
+```scala
+import users._      // 导入包 users 中的所有成员
+import users.User   // 导入类 User
+import users.{User, UserPreferences}      // 仅导入选择的成员
+import users.{UserPreferences => UPrefs}  // 导入类并且设置别名
+import users.{User => _, _}               // 导入出User类以外的所有users包中的内容
+
+// 所有scala源文件默认导入：
+import java.lang._
+import scala._
+import scala.Predef._
+```
+
+
+
+### 6.2 类和对象
+
+scala中没有public ，一个.scala中可以写多个类
+
+
+
+```scala
+package scala.chapter06
+
+import scala.beans.BeanProperty
+
+object Test03_Class {
+
+  def main(args: Array[String]): Unit = {
+
+    val student = new Student()
+    println(student.age)
+    println(student.sex)
+  }
+}
+
+
+class Student{
+
+  // 定义属性  默认public 可以加private
+  private var name: String = "kasha"
+  // 对于属性，要符合javabean规范 可以增加一下@ 则有了对应的get set方法
+  @BeanProperty
+  var age: Int  = _
+  // 表示当前sex的初值为空，之前说scala变量需要有初始值
+  var sex: String = _
+
+  // 定义方法
+
+}
+
+
+//成员如果需要Java Bean规范的getter和setter的话可以加@scala.beans.BeanProperty相当于自动创建，不需要显式写出。
+```
+
+
+
+#### 6.2.5 构造器
+
+和java一样，scala构造对象也需要调用构造方法，并且可以有任意多个构造方法。
+
+scala类的构造器包括：主构造器和辅助构造器。
+
+辅助构造器，函数的名称为this，可以有多个。
+
+辅助构造方法不能直接构建对象，必须直接或者间接的调用主构造方法。
+
+```scala
+class 类名(形参列表){  // 主构造器
+    // 类体
+    
+    def this(形参列表){   // 辅助构造器
+    }
+    def this(形参列表){	// 辅助构造器
+    }
+}
+
+// 注意：辅助构造器必须是def this 
+// 类名后可以带参数作为主构造器
+```
+
+构造器测试示例代码如下：
+
+```scala
+object Constructor {
+    def main(args: Array[String]): Unit = {
+        val p: Person = new Person()
+        p.Person() // call main constructor
+
+        val p1 = new Person("alice")
+        val p2 = new Person("bob", 25)
+        p1.Person()
+    }
+}
+class Person {
+    var name: String = _
+    var age: Int = _
+    println("call main construtor")
+
+    def this(name: String) {
+        this()
+        println("call assist constructor 1")
+        this.name = name
+        println(s"Person: $name $age")
+    }
+
+    def this(name: String, age: Int) {
+        this(name)
+        this.age = age
+        println("call assist constructor 2")
+        println(s"Person: $name $age")
+    }
+
+    // just a common method, not constructor
+    def Person(): Unit = {
+        println("call Person.Person() method")
+    }
+}
+```
+
+
+
+### 6.3 封装
+
+```
+scala中考虑到Java太冗余了，脱裤子放屁一样。scala中的公有属性，底层实际为private，并通过get方法obj.field()和set方法obj.field_=(value)对其进行操作。所以scala不推荐设置为private。如果需要和其他框架互操作，必须提供Java Bean规范的getter和setter的话可以加@scala.beans.BeanProperty注解。
+```
+
+
+
+访问权限：
+
+- scala中属性和方法默认公有，并且不提供`public`关键字。
+- `private`私有，类内部和伴生对象内可用。
+- `protected`保护权限，scala中比java中严格，只有同类、子类可访问，同包无法访问。【因为java中说实话有点奇怪】
+- `private [pacakgeName]`增加包访问权限，在包内可以访问。
+
+
+
+```scala
+package scala.chapter06
+
+object Test04_ClassForAccess {
+
+  def main(args: Array[String]): Unit = {
+
+  }
+}
+
+
+class Person{
+
+  private var idCard: String = "123456"
+  protected var name: String = "Kasha"
+  var sex: String = "male"
+  protected [chapter06] var age: Int = 19
+}
+
+```
+
+
+
+以下代码为访问权限的示例：
+
+```scala
+package scala.chapter06
+
+object Test04_Access {
+
+  def main(args: Array[String]): Unit = {
+
+
+  }
+}
+
+
+class Worker extends Person{
+  override def printInfo(): Unit = {
+    println(s"Worker:$name $sex $age")
+  }
+}
+```
+
+
+
+### 6.4 继承和多态
+
+
 
 7 集合
 
