@@ -1318,6 +1318,97 @@ class Person {
 }
 ```
 
+主构造方法默认有，查看以下示例代码：
+
+```scala
+package scala.chapter06
+
+object Test06_Constructor_Main1 {
+
+  def main(args: Array[String]): Unit = {
+
+    val s = new TestStudent
+  }
+}
+
+
+class TestStudent(){
+
+  var name:String = _
+  var age:Int = _
+  println("Main Constructor execute ...")
+
+  def this(name:String){
+    this()
+    println("Constructor 2 execute ...")
+    this.name = name
+    println(s"name:$name , age:$age")
+  }
+}
+
+# 执行后代码显示如下： 默认调用了主构造方法
+Main Constructor execute ...
+
+Process finished with exit code 0
+```
+
+
+
+#### 6.2.6 构造器参数
+
+scala类的主构造函数的形参包括三种类型：未用任何修饰、var修饰、val修饰
+
+- 未用任何修饰：这个参数就是一个局部变量
+- var修饰，作为类的成员属性使用，可以修改
+- val修饰，作为类的只读属性使用，不可修改
+
+示例代码如下：
+
+```scala
+package scala.chapter06
+
+object Test06_ConstructorParams {
+
+  def main(args: Array[String]): Unit = {
+
+    val stu01_1 = new Student01
+    println(s"stu10_1:[name:${stu01_1.name},age:${stu01_1.age}]")
+    // 赋值需要
+    stu01_1.name = "kasha"
+    stu01_1.age = 13
+    println(s"stu10_1:[name:${stu01_1.name},age:${stu01_1.age}]")
+    // 这种赋值太麻烦，请看Student01
+
+    val yasuo = new Student02("Yasuo", 15)
+    println(s"yasuo:[name:${yasuo.name},age:${yasuo.age}]")
+  }
+}
+
+// 无参构造 :创建时没办法赋值
+class Student01{
+  var name:String = _
+  var age:Int = _
+}
+
+class Student02(var name:String, var age:Int)
+
+// 这种写法获取不到，还得单独设置，受java影响太大，不推荐使用
+class Student03(name:String, age:Int)
+
+
+class Student6(var name:String, var age:Int){
+  var school:String = _
+
+  def this(name:String, age:Int, school:String){
+
+    this(name,age)
+    this.school = school
+  }
+}
+```
+
+
+
 
 
 ### 6.3 封装
@@ -1384,6 +1475,322 @@ class Worker extends Person{
 
 
 ### 6.4 继承和多态
+
+
+
+#### 6.4.1 继承
+
+语法：class 子类 extends 父类 {类体}
+
+scala是单继承
+
+继承的调用顺序：父类构造器>子类构造器
+
+示例代码如下：
+
+```scala
+package scala.chapter06
+
+object Test07_Inherit {
+
+  def main(args: Array[String]): Unit = {
+
+    val test = new Student7("test", 18, 10001)
+    test.printerInfo()
+    // 结果显示这段代码的调用顺序为：
+    /*
+    1. 父类主构造器 -- 创建完父类
+    2. 子类主构造器
+    3. 子类的辅助构造器
+     */
+  }
+}
+
+
+// 定义父类
+class Person7(){
+
+  var name:String = _
+  var age:Int = _
+
+  println("1.Person7 Constructor")
+
+  def this(name:String, age:Int){
+    this()
+    println("2. Person7 父类辅助构造器调用")
+    this.name = name
+    this.age = age
+  }
+
+  def printerInfo(): Unit = {
+    println(s"Person7: name:$name, age:$age")
+  }
+}
+
+// 定义子类
+class Student7(name:String, age:Int) extends Person7{
+  var stuNo:Int = _
+  println("1.Student7 Constructor")
+
+  def this(name: String, age: Int ,stuNo:Int) {
+    this(name,age)
+    println("2. Student7 子类辅助构造器调用")
+    this.stuNo = stuNo
+  }
+
+
+}
+```
+
+
+
+#### 6.4.2 多态
+
+动态绑定和多态
+
+
+
+！！！ java中存在的问题，方法是动态绑定的，但是属性是静态绑定的
+
+```java
+// 以下是java测试代码， Worker类是Person类的子类
+Person person = new Worker()
+person.hello();
+System.out.println(person.name);
+// 上述方法中，调用的hello方法由于多态 是person的方法，但是打印的person.name则是person类的变量，这种叫 属性是静态绑定的。
+// Java这中容易出现问题，则scala中都是动态绑定的
+```
+
+以下是scala中的多态示例代码：
+
+```scala
+package scala.chapter06
+
+object Test08_DynamicBind {
+
+  def main(args: Array[String]): Unit = {
+
+    val worker08:Peron08 = new Worker08
+    println(worker08.name)
+    worker08.hello()
+  }
+}
+
+class Peron08{
+
+  val name:String = "person08"
+
+  def hello(): Unit = {
+    println("hello person08")
+  }
+}
+
+class Worker08 extends Peron08{
+
+  override val name: String = "worker08"
+
+  override def hello(): Unit = {
+    println("hello worker08")
+  }
+}
+
+// 输出如下：
+worker08
+hello worker08
+
+Process finished with exit code 0
+```
+
+scala中 关于多态，scala比java做的更加彻底
+
+
+
+### 6.5 抽象类
+
+#### 6.5.1 抽象属性和抽象方法
+
+基本语法：
+
+- 和java一样：只要有抽象属性和抽象方法就得是抽象类，但是抽象类里边可以既没有抽象属性也没有抽象方法
+
+- `abstract calss ClassName`
+- 抽象属性：`val/var name: Type`，不给定初始值。
+- 抽象方法：`def methodName(): RetType`，只声明不实现。
+
+- 子类如果没有覆写全部父类未定义的属性和方法，那么就必须定义为抽象类。老生常谈了。
+- 重写非抽象方法属性必须加`override`，重写抽象方法则可以不加`override`。
+- 子类调用父类中方法使用`super`关键字。
+- 子类重写父类抽象属性，父类抽象属性可以用`var`修饰，子类`val var`都可以。因为父类没有实现嘛，需要到子类中来实现。
+- 如果是**重写非抽象属性**，则父类非抽象属性只支持`val`，不支持`var`。因为`var`修饰为可变量，子类继承后可以直接使用修改，没有必要重写。`val`不可变才有必要重写。
+- 实践建议是重写就加`override`，都是很自然的东西，理解就好，不必纠结于每一个细节。
+
+
+
+示例代码如下：
+
+```scala
+package scala.chapter06
+
+object Test09_AbstractClass {
+
+  def main(args: Array[String]): Unit = {
+
+    val student = new Student9
+    student.sleep()
+  }
+}
+
+// 定义抽象类
+abstract class Person9{
+
+  // 非抽象属性
+  val name:String = "person"
+  // 抽象属性
+  var age:Int
+
+  // 非抽象方法
+  def eat():Unit = {
+    println("Person eat ... ")
+  }
+  // 抽象方法
+  def sleep():Unit
+}
+
+// 继续抽象子类
+abstract class SubPerson9{
+
+}
+
+// 定义具体的实现子类
+class Student9 extends Person9{
+  override var age: Int = _
+
+  override def sleep(): Unit = {
+    // 调用父类的
+    super.eat()
+    println("student sleep")
+  }
+}
+```
+
+
+
+#### 6.5.2 匿名子类
+
+应用背景：实际使用时可能并不关心具体实现子类叫什么，直接实现就可以了。就出现了匿名子类。
+
+匿名子类的实例代码如下所示：
+
+```scala
+package scala.chapter06
+
+object Test10_AnnoymousClass {
+
+  def main(args: Array[String]): Unit = {
+
+    val person1 = new Person10 {
+      override val name: String = "Annoymous"
+
+      override def eat(): Unit = {
+
+        println("eat ingggggg")
+      }
+    }
+    person1.eat()
+  }
+}
+
+
+abstract class Person10{
+
+  val name:String
+  def eat():Unit
+}
+```
+
+
+
+#### 6.5.3 伴生对象/单例对象
+
+背景：java中有static关键字，对象声明static属性或者方法，就可以基于 类名.属性/方法进行调用了，不是很符合面向对象的理念，所以scala中诞生了伴生对象。
+
+如果单例对象名和类名一致，则称该单例对象为这个类的伴生对象，这个类的所有静态属性/方法都可以放在这个伴生对象中进行声明。
+
+基本语法：
+
+```
+object Person{
+	val country:String = "China";
+}
+```
+
+伴生对象和伴生类之间可以互相访问。即使是private修饰的。
+
+```scala
+package scala.chapter06
+
+object Test11_Object {
+
+  def main(args: Array[String]): Unit = {
+
+    val auser = new Student11("auser", 17)
+    auser.printInfo()
+  }
+}
+
+
+class Student11(val name:String, val age:Int){
+  def printInfo(): Unit = {
+    println(s"student11: name:$name, age:$age ,${Student11.school}")
+  }
+}
+
+object Student11{
+  val school:String = "dlut"
+}
+```
+
+用伴生对象实现单例模式，示例代码如下：
+
+```scala
+package scala.chapter06
+
+/**
+ * 以下代码使用伴生对象实现单例设计模式
+ */
+object Test12_ObjectSingleton {
+
+  def main(args: Array[String]): Unit = {
+
+    val s1 = Student12.getStu()
+    val s2 = Student12.getStu()
+    println(s1)
+    println(s2)
+  }
+}
+
+class Student12 private(val name: String, val age: Int) {
+  def printInfo(): Unit = {
+    println(s"student12:[name:$name, age:$age]")
+  }
+}
+
+object Student12 {
+  // 单例对象
+  private val stu12: Student12 = new Student12("Ryze", 18)
+
+  // 获取单例方法
+  def getStu(): Student12 = stu12
+}
+```
+
+
+
+
+
+
+
+
 
 
 
