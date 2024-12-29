@@ -7,6 +7,7 @@
 20241224：001-57 58开始看
 20241226： -74 75开始看
 20241228：82开始看
+20241229: 101看完了 102开始看
 
 
 跳过的部分[28,47]
@@ -1941,7 +1942,7 @@ class Student13 extends Person13 with Young {
 
 动态混入的实现：
 
-```
+```scala
 val stu = new Student14 with Talent{
 	...
 }
@@ -2236,31 +2237,272 @@ Java集合：
 
 Scala集合三大类型：
 
-- 序列`Seq`，集合`Set`，映射`Map`，所有集合都扩展自`Iterable`。
-
-- 对于几乎所有集合类，都同时提供
-
-  可变和不可变
-
-  版本。
-
+- 三大类型：序列`Seq`，集合`Set`，映射`Map`，所有集合都扩展自`Iterable`。
+- 对于几乎所有集合类，都同时提供 可变和不可变 的版本 分别位于不同包
   - 不可变集合：`scala.collection.immutable`
   - 可变集合：`scala.collection.mutable`
   - 两个包中可能有同名的类型，需要注意区分是用的可变还是不可变版本，避免冲突和混淆。
-
 - 对于不可变集合，指该集合长度数量不可修改，每次修改（比如增删元素）都会返回一个新的对象，而不会修改源对象。
-
 - 可变集合可以对源对象任意修改，一般也提供不可变集合相同的返回新对象的方法，但也可以用其他方法修改源对象。
-
 - **建议**：操作集合时，不可变用操作符，可变用方法。操作符也不一定就会返回新对象，但大多是这样的，还是要具体看。
-
 - scala中集合类的定义比java要清晰不少。
+
+
+
+### 7.1 集合简介
+
+#### 7.1.1 不可表集合介绍
 
 不可变集合：
 
 - `scala.collection.immutable`包中不可变集合关系一览：
 
 ![](scala_image\s11.png)
+
+- 不可变集合没有太多好说的，集合和映射的哈希表和二叉树实现是肯定都有的，序列中分为随机访问序列（数组实现）和线性序列（链表实现），基本数据结构都有了。
+- `Range`是范围，常用来遍历，有语法糖支持`1 to 10 by 2` `10 until 1 by -1`其实就是隐式转换加上方法调用。
+- scala中的`String`就是`java.lang.String`，和集合无直接关系，所以是虚箭头，是通过`Perdef`中的低优先级隐式转换来做到的。经过隐式转换为一个包装类型后就可以当做集合了。
+- `Array`和`String`类似，在图中漏掉了。
+- 此类包装为了兼容java在scala中非常常见，scala中很多类型就是对java类型的包装或者仅仅是别名。
+- scala中可能会推荐更多地使用不可变集合。能用不可变就用不可变。
+
+
+
+#### 7.1.2 可变集合
+
+![](scala_image\s12.png)
+
+- 序列中多了`Buffer`，整体结构差不多。
+
+不可变和可变：
+
+- 不可变指的是对象大小不可变，但是可以修改元素的值（不能修改那创建了也没有用对吧），需要注意这一点。而如果用了`val`不变量存储，那么指向对象的地址也不可变。
+- 不可变集合在原集合上个插入删除数据是做不到的，只能返回新的集合。
+
+
+
+
+
+
+
+
+
+### 7.2 数组
+
+一组连续空间的
+
+#### 7.2.1 不可变数组
+
+`val arr1 = new Array[Int](10)`
+
+示例代码如下：
+
+```scala
+package scala.chapter07
+
+object Test01_ImmutableArray {
+
+  def main(args: Array[String]): Unit = {
+
+    // 1.创建数组
+    val arr1 = new Array[Int](10)
+    // 还有Array的伴生对象
+    val arr2 = Array.apply(12,123,1234,12345)
+    println(arr2)
+
+    // 访问元素
+    println(arr2(0))
+  }
+}
+
+```
+
+数组的遍历打印代码如下：
+
+```scala
+package scala.chapter07
+
+object Test01_ImmutableArray {
+
+  def main(args: Array[String]): Unit = {
+
+    // 1.创建数组
+    val arr1 = new Array[Int](10)
+    // 还有Array的伴生对象
+    val arr2 = Array.apply(12,123,1234,12345)
+    println(arr2)
+
+    arr2(0)=99
+    // 访问元素
+    println(arr2(0))
+    // 打印
+    for (i<- 0 to arr2.length-1){
+      print(arr2(i) + " ")
+    }
+    println()
+    for (i <- 0 until  arr2.length) {
+      print(arr2(i) + " ")
+    }
+    println()
+    for (i <- arr2.indices) print(arr2(i) + " ")
+    println()
+    // 直接遍历所有元素 不走索引 增强for循环
+    for (elem <- arr2) print(elem + " ")
+    println()
+    // 迭代器
+    val iter  = arr2.iterator
+    while (iter.hasNext){
+      print(iter.next() + " ")
+    }
+    println()
+    // for each
+    arr2.foreach((elem:Int) => print(elem + " "))
+    arr2.foreach( print )
+
+    println()
+    print(arr2.mkString("--"))
+  }
+}
+
+```
+
+数组添加元素，并不是在原数组添加元素，而是添加后返回一个新的数组
+
+```scala
+package scala.chapter07
+
+object Test01_ImmutableArray_2 {
+
+  def main(args: Array[String]): Unit = {
+
+    val arr2 = new Array[Int](10)
+    val arr3 = arr2.:+(13)  // 往后添加
+    var arr4 = arr2.+:(11)  // 往前添加
+
+    println(arr2.mkString(" ")) // 0 0 0 0 0 0 0 0 0 0
+    println(arr3.mkString(" ")) // 0 0 0 0 0 0 0 0 0 0 13
+    println(arr4.mkString(" ")) // 11 0 0 0 0 0 0 0 0 0 0
+
+    var arr5 = arr2 :+ 15
+    println(arr5.mkString(" ")) // 0 0 0 0 0 0 0 0 0 0 15
+    var arr6 = 10 +: 29 +:  arr2
+    println(arr6.mkString(" ")) // 10 29 0 0 0 0 0 0 0 0 0 0
+
+  }
+}
+
+```
+
+
+
+#### 7.2.2 可变数组
+
+类型`ArrayBuffer`
+
+- 推荐：不可变集合用运算符，可变集合直接调用对应方法。运算符容易迷惑。
+- 更多方法查看文档和源码用到去找就行。
+- 可变数组和不可变数组可以调用方法互相转换。
+- 常用方法：append prepend insert() insertAll appendAll prependAll remove -=
+
+示例代码如下：
+
+```scala
+package scala.chapter07
+
+import scala.collection.mutable.ArrayBuffer
+
+object Test02_MutableArray {
+
+  def main(args: Array[String]): Unit = {
+
+    val arr1:ArrayBuffer[Int] = new ArrayBuffer[Int]()
+    // 或者使用伴生对象进行创建
+    val arr2 = ArrayBuffer(1,12,123,1234)
+    println(arr2.mkString(" "))
+
+    // 可变数组追加
+    arr1 += 14  // 后边增加
+    println(arr1.mkString(" "))
+    13 +=: arr1  // 前边增加
+    println(arr1.mkString(" "))
+
+    arr1.append(15) // 后边增加
+    println(arr1.mkString(" "))
+    arr1.prepend(12) // 前边增加
+    println(arr1.mkString(" "))
+
+    arr1.insert(0,11) // 指定位置
+    println(arr1.mkString(" "))
+
+    arr1.prependAll(ArrayBuffer(9,10))
+    println(arr1.mkString(" "))
+  }
+}
+
+```
+
+
+
+
+
+#### 7.2.3 可变 不可变的转换
+
+可变数组和不可变数组可以调用方法互相转换:
+
+- 可变=>不可变 toArray
+- 不可变=>可变 toBuffer
+
+```scala
+package scala.chapter07
+
+import scala.collection.mutable.ArrayBuffer
+
+object Test02_Transform {
+
+  def main(args: Array[String]): Unit = {
+
+    val arr_InMutable = Array(11,12,13)
+    val arr_Mutable = ArrayBuffer(101,102,103)
+
+    // 可变转换为不可变
+    val new_arr1 = arr_Mutable.toArray
+    println(new_arr1.mkString(" "))
+
+    // 不可变转换为可变
+    val new_arr2 = arr_InMutable.toBuffer
+    println(new_arr2.mkString(" "))
+    println(new_arr2)
+  }
+}
+
+```
+
+
+
+#### 7.2.4 多维数组
+
+- 就是数组的数组。
+- 使用`Array.ofDim[Type](firstDim, secondDim, ...)`方法。
+
+
+
+### 7.3 Seq集合
+
+
+
+
+
+### 7.4 Set集合
+
+
+
+
+
+### 7.5 Map集合
+
+
+
+
 
 
 
