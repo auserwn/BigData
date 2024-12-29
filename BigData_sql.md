@@ -63,9 +63,9 @@ GREATEST(value1, value2, ..., valueN) 返回一组给定值中的最大值。这
 
 ROUND(expression, decimal_places) decimal_places指定四舍五入后的位数。如果是正整数，则表示四舍五入到小数点后几位；如果是负整数，则表示四舍五入到小数点前几位。
 
-get_json_object(properties, '$.item_type')
+get_json_object(params, '$.item_type')
 
-concat(round(start_download_pv*100/expose_pv,2),'%')
+concat(round(sd_pv*100/e_pv,2),'%')
 
 COALESCE(expression1, expression2, ..., expressionN) 返回 第一个非 NULL 的值。如果所有传递的参数都是 NULL，则返回 NULL。
 
@@ -81,7 +81,7 @@ distribute by cast(rand() * 5 as int)
 数据打散：在某些情况下，可能希望打乱数据的顺序，减少热点数据的影响，或者消除某些特定模式的偏倚。
 
 
-sum(if(ifnull(download_pv,0) = 0, open_pv, null))
+sum(if(ifnull(dd_pv,0) = 0, open_pv, null))
 
 
 INSERT OVERWRITE TABLE new_table 
@@ -100,14 +100,14 @@ uncache TABLE etl;
 
 ```SQL
 GROUP BY  date
-         ,launch_type
-         ,launch_channel_type
-         ,cur_ver_code
+         ,a
+         ,b
+         ,c
 GROUPING SETS(
-    (date, cur_ver_code), 
-    (date, launch_type, cur_ver_code), 
-    (date, launch_channel_type, cur_ver_code), 
-    (date, launch_type, launch_channel_type, cur_ver_code)
+    (date, a), 
+    (date, a, b), 
+    (date, a, c), 
+    (date, a, b, c)
 )
 
 GROUPING SETS 会分别计算这四个分组集的聚合结果，而不是仅仅依赖单一的 GROUP BY 列组合.
@@ -135,8 +135,6 @@ GROUP BY ROLLUP(col1, col2, ..., colN);
 
 ROLLUP(col1, col2, ..., colN)：ROLLUP 会依次按给定列组合进行分组，并计算每一层次的聚合结果。
 ```
-
-![img](https://xiaomi.f.mioffice.cn/space/api/box/stream/download/asynccode/?code=ZjU1MzU1NGI5ZWIzNjQ5Nzc2ODI0OThhN2ZlYTQ0N2ZfVEFxZ2ljWmdiY3pseW1uOVZFU1FVeFBjdnhGMjBmdDZfVG9rZW46Ym94azRXSE16ajFTc0JqRTFNU3VwbTg5MGh0XzE3MzUzNjU1OTE6MTczNTM2OTE5MV9WNA)
 
 **`GROUPING SETS`**：允许你显式指定哪些列的组合需要进行聚合，因此它提供了更多的灵活性，允许你定义自己需要的分组，而不像 `CUBE` 和 `ROLLUP` 那样自动生成。
 
@@ -169,8 +167,6 @@ SELECT  /*+ mapjoin(b) */ a.date
 减少连续解析Json字段
 ```
 
-![img](https://xiaomi.f.mioffice.cn/space/api/box/stream/download/asynccode/?code=NDgxZTg4YzdjOTk3MjhmYTZmMWRiMWZkYWU3YWY0NDBfb21KcU5kVXdEdUc1MnZtSzJaU1JoZkxBSFJWRmlkOGVfVG9rZW46Ym94azRocHEwMWtzUzVoQURub28yVmRNS2JkXzE3MzUzNjU1OTE6MTczNTM2OTE5MV9WNA)
-
 ## 9 优化案例
 
 ### 9.1 
@@ -178,43 +174,5 @@ SELECT  /*+ mapjoin(b) */ a.date
 以下单sql执行需要一分钟，单天数据量平均800w，查询较慢，怎么做？
 
 ```SQL
-SELECT  DATE_FORMAT(
-                        DATE_ADD(
-                          ads_apapstore_download_chain_nobaoming_di.`date`
-                          ,INTERVAL 7 day
-                        )
-                        ,'%Y%m%d'
-                      ) AS `group_alias3`
-                      ,ads_apapstore_download_chain_nobaoming_di.`cur_ver_code` AS `group_alias4`
-                      ,ads_apapstore_download_chain_nobaoming_di.`download_type` AS `group_alias5`
-                      ,SUM(
-                        ads_apapstore_download_chain_nobaoming_di.`download_duration`
-                      ) / SUM(
-                            ads_apapstore_download_chain_nobaoming_di.`download_success_pv`
-                      ) AS `b1`
-                      ,sum(
-                        ads_apapstore_download_chain_nobaoming_di.`verify_duration`
-                      ) / sum(
-                            ads_apapstore_download_chain_nobaoming_di.`download_success_pv`
-                      ) AS `b5`
-                      ,SUM(
-                        ads_apapstore_download_chain_nobaoming_di.`install_time_length`
-                      ) / SUM(
-                            ads_apapstore_download_chain_nobaoming_di.`install_success_pv`
-                      ) AS `b3`
-              FROM    doris_zjyprc_hadoop.mig2_app_store_data.ads_apapstore_download_chain_nobaoming_di ads_apapstore_download_chain_nobaoming_di
-              WHERE   1 = 1
-              AND     (
-                    ads_apapstore_download_chain_nobaoming_di.`date` >= 20241219
-                    AND     ads_apapstore_download_chain_nobaoming_di.`date` < 20241221
-                      )
-              GROUP BY  DATE_FORMAT(
-                          DATE_ADD(
-                            ads_apapstore_download_chain_nobaoming_di.`date`
-                            ,INTERVAL 7 day
-                          )
-                          ,'%Y%m%d'
-                        )
-                        ,ads_apapstore_download_chain_nobaoming_di.`cur_ver_code`
-                        ,ads_apapstore_download_chain_nobaoming_di.`download_type`
+
 ```
