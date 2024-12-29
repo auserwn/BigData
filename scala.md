@@ -6,6 +6,7 @@
 学习记录：
 20241224：001-57 58开始看
 20241226： -74 75开始看
+20241228：82开始看
 
 
 跳过的部分[28,47]
@@ -1710,7 +1711,7 @@ abstract class Person10{
 
 
 
-#### 6.5.3 伴生对象/单例对象
+### 6.6 伴生对象/单例对象
 
 背景：java中有static关键字，对象声明static属性或者方法，就可以基于 类名.属性/方法进行调用了，不是很符合面向对象的理念，所以scala中诞生了伴生对象。
 
@@ -1775,26 +1776,497 @@ class Student12 private(val name: String, val age: Int) {
   }
 }
 
-object Student12 {
-  // 单例对象
-  private val stu12: Student12 = new Student12("Ryze", 18)
 
-  // 获取单例方法
-  def getStu(): Student12 = stu12
+// 这是饿汉单例模式
+//object Student12 {
+//  // 单例对象
+//  private val stu12: Student12 = new Student12("Ryze", 18)
+//
+//  // 获取单例方法
+//  def getStu(): Student12 = stu12
+//}
+
+
+// 懒汉单例模式
+object Student12{
+  private var stu12: Student12 = _
+
+  def getStu():Student12 = {
+    if (stu12 == null){
+      new Student12("Ryze",19)
+    }
+    else
+      stu12
+  }
+
+
+}
+```
+
+单例模式：饿汉 懒汉 查看上述示例代码，实现和java逻辑一致。
+
+
+
+### 6.7 特质 Trait
+
+- 替代java接口的概念。但比接口更为灵活，一种实现多继承的手段。
+- 多个类具有相同的特征时，就可以将这个特征提取出来，用继承的方式来复用。
+- 用关键字`trait`声明。特质和抽象类类似，既可以有具体的属性和方法也可以有抽象的属性和方法。
+- 这里区分继承和接口：继承可以是一些本质的属性，接口则是一些特征。所以何时使用继承父类，何时使用接口要考虑。
+- scala中引入trait，第一可以替代java中的接口，第二则也是对单继承机制的一种补充。
+- 注意：先写父类(如果有)，再写特质
+
+```scala
+trait traitName {
+    ...
+}
+基本语法：
+class 类名 extends 特质1 with 特质2 with 特质3 ...
+class 类名 extends 父类 with 特质1 with 特质2 ...
+```
+
+
+
+#### 6.7.1 Trait基础
+
+示例代码如下：
+
+```scala
+package scala.chapter06
+
+object Test13_Trait {
+
+  def main(args: Array[String]): Unit = {
+
+    val student1 = new Student13
+    student1.dating()
+  }
+}
+
+// 定义一个父类
+class Person13{
+  val name:String  = "Person"
+  var age:Int = 18
+
+  def sayHello():Unit = {
+    println("hello from :" + name)
+  }
+}
+
+//定义特质
+trait Young{
+  // 声明抽象和非抽象属性
+  var age:Int
+  val name:String = "young"
+
+  // 定义抽象和非抽象方法
+  def play():Unit = {
+    println("young play")
+  }
+  def dating():Unit
+}
+class Student13 extends Person13 with Young {
+  override def dating(): Unit = {
+    println("student13 dating")
+  }
+}
+```
+
+示例代码：
+
+```scala
+package scala.chapter06
+
+object Test13_Trait {
+
+  def main(args: Array[String]): Unit = {
+
+    val student1 = new Student13
+    student1.sayHello()
+    student1.dating()
+  }
+}
+
+// 定义一个父类
+class Person13{
+  val name:String  = "Person"
+  var age:Int = 18
+
+  def sayHello():Unit = {
+    println("hello from :" + name)
+  }
+}
+
+//定义特质
+trait Young{
+  // 声明抽象和非抽象属性
+  var age:Int
+  val name:String = "young"
+
+  // 定义抽象和非抽象方法
+  def play():Unit = {
+    println("young play")
+  }
+  def dating():Unit
+}
+class Student13 extends Person13 with Young {
+  // 父类和trait中都有name age 那继承后算谁的呢？优先级
+  // 属性冲突，需要重写lass Student13 inherits conflicting members:
+  override val name: String = "student13's name"
+
+  // 实现抽象方法
+  override def dating(): Unit = {
+    println("student13 dating")
+  }
+
+  // 重写父类方法
+  override def sayHello(): Unit = {
+    super.sayHello()
+    println("hello from student13")
+  }
+}
+```
+
+- 引入/混入(mixin)特征：
+  - 有父类`class extends baseClass with trait1 with trait2 ... {}`
+  - 没有父类`class extends trait1 with trait2 ... {}`
+- 其中可以定义抽象和非抽象的属性和方法。
+- 匿名子类也可以引入特征。
+- 特征和基类或者多个特征中重名的属性或方法需要在子类中覆写以解决冲突，最后因为动态绑定，所有使用的地方都是子类的字段或方法。属性的话需要类型一致，不然提示不兼容。方法的话参数列表不一致会视为重载而不是冲突。
+- 如果基类和特征中的属性或方法一个是抽象的，一个非抽象，且兼容，那么可以不覆写。很直观，就是不能冲突不能二义就行。
+- 多个特征和基类定义了同名方法的，就需要在子类重写解决冲突。其中可以调用父类和特征的方法，此时`super.methodName`指代按照顺序最后一个拥有该方法定义的特征或基类。也可以用`super[baseClassOrTraitName].methodName`直接指代某个基类的方法，注意需要是直接基类，间接基类则不行。
+- 也就是说基类和特征基本是同等地位。
+
+
+
+动态混入的实现：
+
+```
+val stu = new Student14 with Talent{
+	...
+}
+其实这个代码和匿名子类很像
+```
+
+
+
+#### 6.7.2 特质叠加-钻石问题
+
+特征的叠加顺序，定义多个特征。
+
+```
+class Student15 extends Person13 with Talent15 with Knowledge15
+如果特征Talent15 和 Knowledge15 都有increase方法
+override def increase():Unit = {
+	super.increase()
+}
+这时候调用的是谁的呢？--Knowledge15
+特征是从后往前 不管前边是父类还是Trait
+```
+
+
+
+![](scala_image\s9.png)
+
+钻石问题**特质叠加**：示例代码如下：
+
+```scala
+package scala.chapter06
+
+/**
+ * 该案例主要是针对钻石问题**特质叠加**的代码示例
+ */
+object Test15_TraitOverlying {
+
+  def main(args: Array[String]): Unit = {
+
+    // 钻石问题 特诊叠加
+    val myBall = new MyFootBall
+    println(myBall.describe())
+  }
+}
+
+
+// 定义球类特征
+trait Ball{
+  def describe():String = "Ball"
+}
+
+// 定义子特征
+// 定义颜色特征
+trait ColorBall extends Ball{
+  var color:String = "red"
+  override def describe(): String = color + "_" + super.describe()
+}
+// 定义种类特征
+trait CategoryBall extends Ball{
+  var category:String = "foot"
+  override def describe(): String = category + "_" + super.describe()
+}
+
+// 定义一个自定义球的类
+class MyFootBall extends CategoryBall with ColorBall{
+  // 这里应该是ColorBall 的describe
+  override def describe(): String = "MyFootBall is : " + super.describe()
+
+  // 按照之前的输出应该是MyFootBall is : super.describe() = MyFootBall is : red_Ball
+  // 实际输出却是：MyFootBall is : red_foot_Ball 怎么出现了CategoryBall的foot_呢？
+}
+```
+
+以上代码的解释如下：
+
+![](scala_image\s10.png)
+
+#### 6.7.5 特质自身类型
+
+自身类型(self type)可实现依赖注入的功能。
+
+- 可实现**依赖注入**的功能。
+- 一个类或者特征指定了自身类型的话，它的对象和子类对象就会拥有这个自身类型中的所有属性和方法。
+- 是将一个类或者特征插入到另一个类或者特征中，属性和方法都就像直接复制插入过来一样，能直接使用。但不是继承，不能用多态。
+- 语法，在类或特征中：`_: SelfType =>`，其中`_`的位置是别名定义，也可以是其他，`_`指代`this`。插入后就可以用`this.xxx`来访问自身类型中的属性和方法了。
+- 注入进来的目的是让你能够使用，可见，提前使用应该拥有的属性和方法。最终只要自身类型和注入目标类型同时被继承就能够得到定义了。
+
+示例代码如下：
+
+```scala
+package scala.chapter06
+
+object Test16_TraitSelfType {
+
+  def main(args: Array[String]): Unit = {
+
+    val ryze = new RegisterUser("Ryze", "123456")
+    ryze.insert()
+  }
+}
+
+// 定义用户类
+class User(val name: String, val password: String)
+
+trait UserDao{
+
+  _: User =>
+  // 上边这种写法就= 操作时默认当前有一个user 接下来可以直接操作 这里下划线可以用任意字符代替
+  // 这里避免使用了继承，实现了依赖注入的功能
+
+  // 插入用户
+  def insert():Unit = {
+    println(s"insert into db: ${this.name}, ${this.password}")
+  }
+}
+class RegisterUser(name:String, password: String) extends User(name, password) with UserDao
+```
+
+
+
+#### 6.7.6 特质Trait和抽象类
+
+何时使用特质，何时使用抽象类
+
+- 优先使用Trait。因为一个类扩展多个Trait是很方便的，但是却只能扩展一个抽象类。
+
+- 如果需要构造参数函数，使用抽象类。抽象类可以定义带参数的构造函数，而Trait不可以。
+
+
+
+### 6.8 扩展
+
+#### 6.8.1 类型的检查和转换
+
+- 判断类型：`obj.isInstanceOf[T]`，确切匹配的类型或者父类都返回true。
+- 转换类型：`obj.asInstance[T]`，转换为目标类型。
+- 获取类名：`classOf[T]`，得到类对应的`Class`对象`Class[T]`，转字符串结果是`class package.xxx.className`。
+- 获取对象的类：`obj.getClass`
+
+示例代码如下：
+
+```scala
+package scala.chapter06
+
+object Test17_Extends {
+
+  def main(args: Array[String]): Unit = {
+
+    val ryze: Student17 = new Student17("Ryze", 18)
+    val kasha: Peron17 = new Student17("Kasha", 18)
+
+    // 以下四个结果都是true
+    println(ryze.isInstanceOf[Student17])
+    println(ryze.isInstanceOf[Peron17])
+    println(kasha.isInstanceOf[Student17])
+    println(kasha.isInstanceOf[Student17])
+
+    // 类型的转换
+    // kasha创建时声明为kasha: Peron17 那么先判断可以的话转化为student17 再调用方法
+    if (kasha.isInstanceOf[Student17]){
+      val newKasha = kasha.asInstanceOf[Student17]
+      newKasha.study()
+    }
+
+    //classof
+    println(classOf[Student17])
+  }
+}
+
+
+class Peron17(val name:String, val age:Int){
+
+  def sayHi():Unit = {
+    println("hi from person:" + name)
+  }
+}
+
+class Student17(name:String, age:Int) extends Peron17(name, age){
+  override def sayHi(): Unit = {
+    println("hi from student:" + name)
+  }
+  def study():Unit = {
+    println(" student study")
+  }
 }
 ```
 
 
 
+#### 6.8.2 枚举类和应用类
+
+说明：
+
+- 枚举类：需要继承Enumeration。用`Value`类型定义枚举值。
+- 应用类：需要继承App，包装了`main`方法，就不需要显式定义`main`方法了，可以直接执行。
+
+示例代码如下：
+
+```scala
+package scala.chapter06
+
+object Test18_Enumeration {
+
+  def main(args: Array[String]): Unit = {
+
+    println(WorkDay.MONDAY)
+    println(WorkDay.MONDAY.id)
+
+  }
+}
+
+// 定义枚举类对象
+/*
+在 Scala 的 Enumeration 中，Value 方法可以用来定义枚举值，括号中的第一个参数（例如这里的 1）表示 枚举值的 ID。ID 是枚举值的唯一标识，默认从 0 开始递增，但你可以显式指定它。
+1：这是枚举值 MONDAY 的 ID（唯一标识）。
+"Monday"：这是该枚举值的字符串表示，或者说是该枚举值的名称
+
+Scala 的 Enumeration 会把每个枚举值存储为一个 Value 对象，其中包含以下内容：
+ID：标识符，用于区分不同的枚举值。
+名称：人类可读的名称，默认是变量名，但可以显式指定。
+
+如果不显式指定 ID 和名称，则 Scala 会自动生成：
+ID 从 0 开始递增。
+名称与变量名相同。
+ */
+object WorkDay extends Enumeration{
+
+  // 这里边底层存储就是1
+  val MONDAY = Value(1,"Monday")
+  val TUESDAY = Value(2,"Tuesday")
+}
+
+// 定义应用类对象
+/*
+是一种方便的方式来定义一个应用程序入口点。它的主要作用是简化程序的启动逻辑，使得你可以直接编写代码而不需要显式地定义 main 方法。
+Scala 编译器会自动生成 main 方法，其行为等效于：
+object TestApp {
+  def main(args: Array[String]): Unit = {
+    println("App start")
+  }
+}
+你写在 object 体中的代码会被放入 App 特质的 delayedInit 方法中执行。
+程序启动时，App 的 main 方法会调用 delayedInit，执行所有在 object 体中定义的代码。
+
+
+使用场景
+简单应用程序：当你的程序逻辑不复杂，只需要一个入口点时。
+快速测试：用于快速测试一些代码片段。
+脚本风格代码：将 Scala 用作脚本语言时（类似于 Python）。
+ */
+object TestApp extends App{
+  println("App start")
+
+  type MyString = String
+  val a: MyString = "test myString"
+  println(a)
+  println(a.getClass)
+}
+```
+
+
+
+#### 6.8.3 Type定义新类型
+
+定义类型别名：`type SelfDefineType = TargetType`
+
+示例代码如下： 定义一个MyString类型
+
+```scala
+object TestApp extends App{
+  println("App start")
+
+  type MyString = String
+  val a: MyString = "test myString"
+  println(a)
+  println(a.getClass)
+  println(classOf[MyString])
+}
+// 运行后输出如下：
+App start
+test myString
+class java.lang.String
+class java.lang.String
+```
+
+
+
+## 7 集合
+
+Java集合：
+
+- 三大类型：列表`List`、集合`Set`、映射`Map`，有多种不同实现。
+
+Scala集合三大类型：
+
+- 序列`Seq`，集合`Set`，映射`Map`，所有集合都扩展自`Iterable`。
+
+- 对于几乎所有集合类，都同时提供
+
+  可变和不可变
+
+  版本。
+
+  - 不可变集合：`scala.collection.immutable`
+  - 可变集合：`scala.collection.mutable`
+  - 两个包中可能有同名的类型，需要注意区分是用的可变还是不可变版本，避免冲突和混淆。
+
+- 对于不可变集合，指该集合长度数量不可修改，每次修改（比如增删元素）都会返回一个新的对象，而不会修改源对象。
+
+- 可变集合可以对源对象任意修改，一般也提供不可变集合相同的返回新对象的方法，但也可以用其他方法修改源对象。
+
+- **建议**：操作集合时，不可变用操作符，可变用方法。操作符也不一定就会返回新对象，但大多是这样的，还是要具体看。
+
+- scala中集合类的定义比java要清晰不少。
+
+不可变集合：
+
+- `scala.collection.immutable`包中不可变集合关系一览：
+
+![](scala_image\s11.png)
 
 
 
 
 
 
-
-
-7 集合
 
 8 模式匹配
 
