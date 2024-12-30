@@ -8,6 +8,7 @@
 20241226： -74 75开始看
 20241228：82开始看
 20241229: 101看完了 102开始看
+20241230: 113看完了 114 开始看 今晚计划看完121 明天看122
 
 
 跳过的部分[28,47]
@@ -2486,13 +2487,161 @@ object Test02_Transform {
 
 
 
-### 7.3 Seq集合
+### 7.3 Seq集合-List
+
+#### 7.3.1 不可变List
+
+- `List`，抽象类，不能直接`new`，使用伴生对象`apply`传入元素创建。
+- `List`本身也有`apply`能随机访问（做了优化）即可以通过下标获取，但是不能`update`更改。
+- `foreach`方法遍历。
+- 支持`+: :+`首尾添加元素。
+- `Nil`空列表，`::`添加元素到表头。
+- 常用`Nil.::(elem)`创建列表，换一种写法就是`10 :: 20 :: 30 :: Nil`得到结果`List(10, 20, 30)`，糖是真滴多！
+- 合并两个列表：`list1 ::: list2` 或者`list1 ++ list2`。
+
+```scala
+package scala.chapter07
+
+object Test04_List {
+
+  def main(args: Array[String]): Unit = {
+
+    // 创建不可变List
+    val list1 = List(1,12,123,1234)
+    println(list1)
+    println(list1(1))
+    list1.foreach(print)
+
+    // 增加元素
+    val l1 = list1.+:(99)
+    val l2 = list1.:+(99)
+    println(l1)
+    println(l2)
+
+    val l4 = list1.::(99)  // 增加到前边
+    println(l4)
+
+    val l5 = Nil.::(99) // 增加到前边
+    println(l5)
+
+    val l6 = 1 :: 2 :: 3 :: Nil // 创建列表
+    println(l6)
+
+    // 列表合并
+    val ll1 = 1 :: Nil
+    val ll2 = 2 :: Nil
+    val ll3 = ll1 ::: ll2
+    val ll4 = ll1 ++ ll2
+    println(ll3)
+    println(ll4)
+  }
+}
+
+```
 
 
+
+#### 7.3.2 可变ListBuffer
+
+- 可变列表`ListBuffer`，和`ArrayBuffer`很像。
+- `final`的，可以直接`new`，也可以伴生对象`apply`传入元素创建（总体来说scala中更推荐这种方式）。
+- 方法：`append prepend insert remove`
+- 添加元素到头或尾：`+=: +=`
+- 合并：`++`得到新的列表，`++=`合并到源上。
+- 删除元素也可以用`-=`运算符。
+- 具体操作很多，使用时阅读文档即可。
+
+```scala
+package scala.chapter07
+
+import scala.collection.mutable.ListBuffer
+
+object Test05_ListBuffer {
+
+  def main(args: Array[String]): Unit = {
+
+    val list1:ListBuffer[Int] = new ListBuffer[Int]()
+    val list2 = ListBuffer(11,22,33)
+
+    println(list2)
+    list1.append(12,123)
+    list1.prepend(1)
+    println(list1)
+    list1.remove(2)
+    println(list1)
+  }
+}
+
+```
 
 
 
 ### 7.4 Set集合
+
+注意：scala中默认使用的是不可变set，如果想使用可变set，需要引入：scala.collection.mutable.Set包
+
+#### 7.4.1 不可变Set
+
+- 数据无序，不可重复。
+- 可变和不可变都叫`Set`，需要做区分。默认`Set`定义为`immutable.Set`别名。
+- 创建时重复数据会被去除，可用来去重。
+- 添加元素：`set + elem`  因为是无序的，所以直接+ 不需要考虑是前边还是后边
+- 合并：`set1 ++ set2 ` 返回结果本身无序
+- 移除元素：`set - elem`
+- 不改变源集合。
+
+```scala
+package scala.chapter07
+
+import scala.collection.mutable.Set
+
+object Test06_Set {
+
+  def main(args: Array[String]): Unit = {
+
+    val s1 = Set(11, 12)
+    println(s1)
+    val s2 = s1 + 11
+    println(s1)
+  }
+}
+
+```
+
+
+
+#### 7.4.2 可变Set
+
+- 操作基于源集合做更改。
+- 为了与不可变集合区分，`import scala.collection.mutable`并用`mutable.Set`。
+- 不可变集合有的都有。
+- 添加元素到源上：`set += elem` `add`
+- 删除元素：`set -= elem` `remove`
+- 合并：`set1 ++= set2`
+- 都很简单很好理解，多看文档和源码就行。
+
+```scala
+package scala.chapter07
+
+import scala.collection.mutable.Set
+
+object Test07_MutableSet {
+
+  def main(args: Array[String]): Unit = {
+
+    val s1 = Set(11, 12, 11, 13)
+    println(s1)
+
+    val flag1 = s1.add(14)
+    println(s1)
+
+    val flag2 = s1.remove(12)
+    println(s1)
+  }
+
+}
+
+```
 
 
 
@@ -2500,13 +2649,413 @@ object Test02_Transform {
 
 ### 7.5 Map集合
 
+#### 7.5.1 不可变Map
+
+- `Map`默认就是`immutable.Map`别名。
+- 两个泛型类型。
+- 基本元素是一个二元组。
+- 遍历Traverse:
+
+```scala
+package scala.chapter07
+
+object Test08_Map {
+
+  def main(args: Array[String]): Unit = {
+
+    val map:Map[String,Int] = Map("a" -> 13,"b"->14)
+    println(map)
+
+    // traverse
+    map.foreach(println)
+    println("====")
+    map.foreach((kv:(String,Int)) => println(kv))
+    map.foreach(kv => println(s"k:${kv._1},v:${kv._2}"))
+
+    // get keys and values
+    for (key <- map.keys) {
+      println(s"${key}:${map.get(key)}")
+    }
+
+    println("---get value of given key ")
+    // get value of given key
+    println(map.get("a"))
+    println(map.get("a").get)
+    println(map.getOrElse("b",-1))
+    println(map("a"))
+
+    // merge
+    val map2 = map ++ Map("c"->33)
+    println(map2)
+  }
+}
+
+```
 
 
 
 
 
+#### 7.5.2 可变Map
+
+- `import scala.collection.mutable.Map`
+- 不可变的都支持，常见操作：put remove -= ++= 
+
+```scala
+package scala.chapter07
+
+import scala.collection.mutable
+
+object Test09_MutableMap {
+
+  def main(args: Array[String]): Unit = {
+
+    // create mutable Map
+    val map: mutable.Map[String, Int] = mutable.Map("a" -> 10, "b" -> 20)
+    // add element
+    map.put("c", 30)
+    map += (("d", 40)) // two () represent tuple to avoid ambiguity
+    println(map)
+    // remove element
+    map.remove("a")
+    map -= "b" // just need key
+    println(map)
+    // modify element
+    map.put("c", 100) // call update, add/modify
+    println(map)
+    // merge Map
+    map ++= Map("a" -> 10, "b" -> 20, "c" -> 30) // add and will override
+    println(map)
+      
+    // val map4 = map1 + map2
+  }
+}
+
+```
 
 
+
+
+
+### 7.6 元组
+
+> 元组可以理解成为一个容器，可以存放各种相同或者不同类型的数据。就是将多个无关的数据封装成为一个整体，称为 **元组**。
+
+- `(elem1, elem2, ...)` 类型可以不同。
+- 最多只能22个元素，从`Tuple1`定义到了`Tuple22`。
+- 使用`_1 _2 _3 ...`访问。
+- 也可以使用`productElement(index)`访问，下标从0开始。
+- `->`创建二元组。
+- 遍历：`for(elem <- tuple.productIterator)`
+- 可以嵌套，元组的元素也可以是元组。
+
+
+
+```scala
+package scala.chapter07
+
+object Test10_Tuple {
+
+  def main(args: Array[String]): Unit = {
+
+    val t1 = (1, "Ryze" ,'a' , true)
+    println(t1)
+
+    // 访问数据
+    println(t1._2)  // 这是从1开始
+    println(t1.productElement(1)) // 这是从0开始
+
+    // 遍历元组数据
+    for (elem <- t1.productIterator){
+      println(elem)
+    }
+  }
+}
+
+```
+
+
+
+### 7.7 集合常用函数
+
+#### 7.7.1 基本属性和常用操作
+
+- 线性序列才有长度`length`、所有集合类型都有大小`size`。
+- 遍历`for (elem <- collection)`、迭代器`for (elem <- collection.iterator)`。
+- 生成字符串`toString` `mkString`，像`Array`这种是隐式转换为scala集合的，`toString`是继承自`java.lang.Object`的，需要自行处理。
+- 是否包含元素`contains`。
+
+
+
+```scala
+package scala.chapter07
+
+object Test11_CommonOp {
+
+  def main(args: Array[String]): Unit = {
+
+    val list = List(1,12,123)
+
+    println(list.length) // 获取集合长度
+    println(list.size)
+
+    for(elem <- list){ // 循环遍历
+      print(elem)
+    }
+    println()
+    for (elem <- list.iterator){
+      print(elem)
+    }
+
+    println(list.mkString(" ")) // 生成字符串
+
+    // 是否包含
+    println(list.contains(123))
+  }
+}
+
+```
+
+
+
+#### 7.7.2 衍生集合
+
+- 获取集合的头元素`head`（元素）和剩下的尾`tail`（集合）。
+- 集合最后一个元素`last`（元素）和除去最后一个元素的初始数据`init`（集合）。
+- 反转`reverse`。
+- 取前后n个元素`take(n) takeRight(n)`
+- 去掉前后n个元素`drop(n) dropRight(n)`
+- 交集`intersect`
+- 并集`union`，线性序列的话已废弃用`concat`连接。
+- 差集`diff`，得到属于自己、不属于传入参数的部分。
+- 拉链`zip`，得到两个集合对应位置元素组合起来构成二元组的集合，大小不匹配会丢掉其中一个集合不匹配的多余部分。
+- 滑窗`sliding(n, step = 1)`，框住特定个数元素，方便移动和操作。得到迭代器，可以用来遍历，每个迭代的元素都是一个n个元素集合。步长大于1的话最后一个窗口元素数量可能个数会少一些。
+
+```scala
+package scala.chapter07
+
+object Test12_DerivedCollection {
+
+  def main(args: Array[String]): Unit = {
+
+    val ll = List(1,2,3,4,5)
+    val ll2 = List(4,5,6,7)
+    println(ll.head) // 头 :1
+    println(ll.tail) // 非头元素:List(2, 3, 4, 5)
+    println(ll.last) // 最后元素：5
+    println(ll.init) // 除去最后一个元素的初始数据:List(1, 2, 3, 4)
+    println(ll.reverse)
+    println(">>>")
+    println(ll.intersect(ll2)) //交集intersec
+  }
+}
+
+```
+
+
+
+#### 7.7.3 集合简单计算
+
+- 求和`sum` 求乘积`product` 最小值`min` 最大值`max`
+- `maxBy(func)`支持传入一个函数获取元素并返回比较依据的值，比如元组默认就只会判断第一个元素，要根据第二个元素判断就返回第二个元素就行`xxx.maxBy(_._2)`。
+- 排序`sorted`，默认从小到大排序。从大到小排序`sorted(Ordering[Int].reverse)`。
+- 按元素排序`sortBy(func)`，指定要用来做排序的字段。也可以再传一个隐式参数逆序`sortBy(func)(Ordering[Int].reverse)`
+- 自定义比较器`sortWith(cmp)`，比如按元素升序排列`sortWith((a, b) => a < b)`或者`sortWith(_ < _)`，按元组元素第二个元素升序`sortWith(_._2 > _._2)`。
+- 例子：
+
+```
+package scala.chapter07
+
+object Test13_SimpleFunction {
+
+  def main(args: Array[String]): Unit = {
+
+    val ll = List(1, 12, 100)
+    val ll2 = List(("Kasha",480),("Yasuo",1350),("Ryze",6300))
+
+    println(ll.sum) // 求和
+
+    println(ll.product) // 乘积
+
+    println(ll.max)
+    println(ll.min)
+
+    println(ll2.maxBy((tuple:(String,Int)) => tuple._2))
+    // 省略后
+    println(ll2.maxBy(_._2))
+
+    // 排序
+    val sorted = ll.sorted
+    val sorted2 = ll.sorted(Ordering[Int].reverse)
+    println(sorted2)
+
+    // sortWith
+    println(ll.sortWith((a:Int, b:Int) => {a<b}))
+    // 简化
+    println(ll.sortWith(_>_))
+  }
+}
+
+```
+
+
+
+#### 7.7.4 集合高级计算
+
+- 大数据的处理核心就是映射（map）和归约（reduce）。
+- 映射操作（广义上的map）：
+  - 过滤：自定义过滤条件，`filter(Elem => Boolean)`
+  - 转化/映射（狭义上的map）：自定义映射函数，`map(Elem => NewElem)`
+  - 扁平化（flatten）：将集合中集合元素拆开，去掉里层集合，放到外层中来。`flatten`
+  - 扁平化+映射：先映射，再扁平化，`flatMap(Elem => NewElem)`
+  - 分组（group）：指定分组规则，`groupBy(Elem => Key)`得到一个Map，key根据传入的函数运用于集合元素得到，value是对应元素的序列。
+- 归约操作（广义的reduce）：
+  - 简化/归约（狭义的reduce）：对所有数据做一个处理，归约得到一个结果（比如连加连乘操作）。`reduce((CurRes, NextElem) => NextRes)`，传入函数有两个参数，第一个参数是第一个元素（第一次运算）和上一轮结果（后面的计算），第二个是当前元素，得到本轮结果，最后一轮的结果就是最终结果。`reduce`调用`reduceLeft`从左往右，也可以`reduceRight`从右往左（实际上是递归调用，和一般意义上的从右往左有区别，看下面例子）。
+  - 折叠（fold）：`fold(InitialVal)((CurRes, Elem) => NextRes)`相对于`reduce`来说其实就是`fold`自己给初值，从第一个开始计算，`reduce`用第一个做初值，从第二个元素开始算。`fold`调用`foldLeft`，从右往左则用`foldRight`（翻转之后再`foldLeft`）。具体逻辑还得还源码。从右往左都有点绕和难以理解，如果要使用需要特别注意。
+- 以上：
+
+```scala
+
+// Map代码
+package scala.chapter07
+
+object Test14_HighLevelFunction {
+
+  def main(args: Array[String]): Unit = {
+
+    val ll = List(1,2,3,4,5,6,7,8,9)
+
+    // 过滤操作
+    val ll_filter = ll.filter((i: Int) => {i % 2 == 0})
+    println(ll_filter)
+    println(ll.filter(_ % 2 == 0))
+
+    // map转换操作
+    val ll_map = ll.map((i: Int) => (("num:"+i, i)))
+    println(ll_map)
+
+    println("=====flatten")
+    val needList:List[List[Int]] = List(List(1,2,3),List(4,5,6))
+    val flatten = needList.flatten
+    println(flatten)
+
+    println("=====flatmap")
+    val fm = List("hello spark", "hello redis", "hello scala")
+//    val fm_res = fm.flatMap(s => s.split(" "))
+    val fm_res = fm.flatMap(_.split(" ")) // 分词
+    println(fm_res)
+
+    println("=====groupby")
+    val llg = List("hello spark", "hello redis", "hello scala")
+    val llg_res1 = llg.flatMap(_.split(" "))
+    val llg_res2 = llg_res1.groupBy((_,1))
+    println(llg_res2)
+
+    // 奇偶分组
+    val tupleToInts = ll.groupBy( num => if(num%2==0) "奇数" else "偶数")
+    println(tupleToInts)
+  }
+}
+
+```
+
+
+
+```scala
+package scala.chapter07
+
+object Test15_HighLevelFunction_Reduce {
+
+  def main(args: Array[String]): Unit = {
+
+    val ll = List(1,2,3,4)
+
+    //val ll_sum = ll.reduce((a, b) => a + b)
+    val ll_sum = ll.reduce( _ + _ )
+    println(ll_sum)
+    println(ll.reduceLeft( _ + _ ))
+    println(ll.reduceRight( _ + _ ))
+
+    // 左右的区别
+    val ll2 = List(10,9,2)
+    println(ll2.reduceLeft( _ - _)) // 先10-9= 1 再 1-2 = -1
+    println(ll2.reduceRight( _ - _)) // 先 9-10 = -1 再 2-(-1) =3
+
+    // Fold折叠
+    println("=====Fold")
+    val ll3 = List(1,2,3,4)
+    println(ll3.fold(10)(_ + _)) // 初始状态+操作
+    // foldLeft foldRight 同上
+  }
+}
+
+```
+
+复杂示例如下： 实现mergeMap
+
+```
+package scala.chapter07
+
+import scala.collection.mutable
+
+object Test16_MergeMap {
+
+  def main(args: Array[String]): Unit = {
+
+    val map1 = Map("a"->1, "b"->2, "c"->3)
+    val map2 = mutable.Map("a"->9, "b"->8, "c"->7, "d"->10)
+
+    val m3 = map1.foldLeft(map2){
+      (mergeMap,m) => {
+        val key = m._1
+        val value = m._2
+        mergeMap(key) = mergeMap.getOrElse(key,0) + value
+        mergeMap
+      }
+    }
+
+    println(m3)
+  }
+
+}
+
+```
+
+
+
+#### 7.7.5 经典WordCount案例
+
+统计排序取前k个
+
+```scala
+package scala.chapter07
+
+object Test17_WordCountCase {
+
+  def main(args: Array[String]): Unit = {
+
+    val ll = List("hello scala", "hello spark", "hello flink")
+    val ll_flatmap = ll.flatMap(_.split(" "))
+    println(ll_flatmap)
+
+    // 相同的单词进行分组
+    val ll_group = ll_flatmap.groupBy(word => word)
+    println(ll_group)
+
+    // 分组后个数统计
+    val ll_count = ll_group.map(kv => (kv._1, kv._2.size))
+    println(ll_count)
+
+    // map转化为list 排序取前1
+    val ll_res = ll_count.toList
+      .sortWith(_._2 > _._2)
+      .take(2)
+
+    print(ll_res)
+  }
+}
+
+```
 
 
 
