@@ -9,7 +9,7 @@
 20241228：82开始看
 20241229: 101看完了 102开始看
 20241230: 113看完了 114 开始看 今晚计划看完121 明天看122
-
+20241231: 137异常开始看
 
 跳过的部分[28,47]
 ```
@@ -2993,7 +2993,7 @@ object Test15_HighLevelFunction_Reduce {
 
 复杂示例如下： 实现mergeMap
 
-```
+```scala
 package scala.chapter07
 
 import scala.collection.mutable
@@ -3048,6 +3048,7 @@ object Test17_WordCountCase {
 
     // map转化为list 排序取前1
     val ll_res = ll_count.toList
+//      .sortWith((a,b) => a._2 > b._2)
       .sortWith(_._2 > _._2)
       .take(2)
 
@@ -3057,14 +3058,611 @@ object Test17_WordCountCase {
 
 ```
 
+复杂一点的wordcount案例：
+
+```scala
+package scala.chapter07
+
+object Test18_ComplexWordCount {
+
+  def main(args: Array[String]): Unit = {
+    val ll: List[(String, Int)] = List(
+      ("hello", 1),
+      ("hello spark", 2),
+      ("hello flink", 2),
+      ("hello kafka", 2)
+    )
+
+    println("===========method 1 ")
+    val ll_temp = ll.map(
+      kv =>{
+        (kv._1.trim + " " ) * kv._2
+      }
+    )
+    println(ll_temp)
+    val res = ll_temp.flatMap(_.split(" "))
+      .groupBy( word => word )
+      .map(kv => (kv._1,kv._2.size))
+      .toList
+    println(res)
 
 
-8 模式匹配
+    println("===========method 2 :直接基于预统计的结果进行转换")
+    val preCountList: List[(String, Int)] = ll.flatMap(
+      t => {
+        val strings: Array[String] = t._1.split(" ")
+        strings.map( word => (word, t._2))
+      }
+    )
+    val res2 = preCountList.groupBy(_._1)
+      .mapValues(
+        tupleList => {
+          tupleList.map(_._2).sum
+        }
+      )
+      .toList
+    println(res2)
 
-9 异常
 
-10 隐式转换
+    println("===========method 3")
+    val temp3 = ll.flatMap{
+      case (words, count) => words.split(" ").map((_,count))
+    }
+    val res3 = temp3.groupBy(_._1)
+      .mapValues(
+        tuplel => {
+          tuplel.map(_._2).sum
+        }
+      )
+      .toList
+    println(res3)
+  }
+}
 
-11 泛型
+```
+
+其他实现：
+
+```scala
+package scala.chapter07
+
+object Test19_WordCountRealizeSelf {
+
+  def main(args: Array[String]): Unit = {
+
+    val ll: List[(String, Int)] = List(
+      ("hello", 1),
+      ("hello spark", 2),
+      ("hello flink", 2),
+      ("hello kafka", 2)
+    )
+
+    val temp = ll.flatMap(
+      kv => {
+        kv._1.split(" ")
+          .map(a => (a, kv._2))
+      }
+    )
+      .groupBy(_._1)
+      .mapValues(
+        slists => {
+          slists.map(_._2).sum
+        }
+      )
+      .toList
+      .sortWith(_._2 > _._2)
+      .take(2)
+
+    println(temp)
+  }
+
+}
+
+```
+
+
+
+### 7.8 队列Queue
+
+队列的特点是先进先出
+
+Traversable -> iterable -> seq -> linearable -> queue
+
+- 可变队列`mutable.Queue`
+- 入队`enqueue(Elem*)` 出队`Elem = dequeue()`
+- 不可变队列`immutable.Queue`，使用伴生对象创建，出队入队返回新队列。
+
+示例代码如下：
+
+```scala
+package scala.chapter07
+
+import scala.collection.mutable
+
+object Test19_Queue {
+
+  def main(args: Array[String]): Unit = {
+
+    // 可变队列
+    // 或者这样定义 val que = new mutable.Queue[String]()
+    // 下边是采用伴生对象的方法
+    val que = mutable.Queue(1,2,3,4)
+    println(que)
+    val en_res = que.enqueue(5)
+    val de_res = que.dequeue()
+    println("en_res :" + en_res)
+    println("de_res :" + de_res)
+    println(que)
+  }
+}
+
+```
+
+
+
+### 7.9 并行集合
+
+背景：scala为了充分使用多核CPU，提供了并行集合，有别于前边的串行集合，用于多核环境的并行计算。
+
+```scala
+package scala.chapter07
+
+object Test20_Parallel {
+
+  def main(args: Array[String]): Unit = {
+
+    // 串行化执行
+    val threads = (0 to 100).map(
+      i => (Thread.currentThread.getName, Thread.currentThread.getId)
+    )
+    println(threads)
+
+    // 并行计算
+    val parThread = (0 to 100).par.map(
+      i => (Thread.currentThread.getName, Thread.currentThread.getId)
+    )
+    println(parThread)
+  }
+}
+
+```
+
+
+
+
+
+## 8 模式匹配
+
+> 什么是scala中的模式匹配？类似于java中的switch语法，但它功能更强大，可以匹配复杂的数据结构和进行解构。
+
+### 8.1 基本语法
+
+```scala
+value match {
+    case caseVal1 => returnVal1
+    case caseVal2 => returnVal2
+    ...
+    case _ => defaultVal
+}
+```
+
+- 每一个case条件成立就返回不会往下走，否则继续往下走。
+- 每个case不需要使用break语句，匹配成功自动中断case。
+- => 后边的代码块，直到下一个case语句之前的代码是作为一个整体执行，可以用{}括起来，也可以不括。
+- case _ => " " 类似于通配符
+- `case`匹配中可以添加模式守卫，用条件判断来代替精确匹配。
+
+```scala
+def abs(num: Int): Int= {
+    num match {
+        case i if i >= 0 => i
+        case i if i < 0 => -i
+    }
+}
+```
+
+
+
+示例代码如下：
+
+```scala
+package scala.chapter8
+
+object Test01_PatternMatchBase {
+
+  def main(args: Array[String]): Unit = {
+
+    println(oper(10,5,"+"))
+    println(oper(10,5,"-"))
+    println(oper(10,5,"*"))
+    println(oper(10,5,"/"))
+    println(oper(10,5,"s"))
+    
+    println("===========")
+    val x: Int = 2
+    val y: String = x match {
+      case 1 => "None"
+      case 2 => "yes"
+      case _ => "error"
+    }
+    println(y)
+  }
+
+
+  def oper(x: Int , y: Int, ope: String) = {
+    ope match {
+      case "+" => x+y
+      case "-" => x-y
+      case "*" => x*y
+      case "/" => x/y
+      case _ => "illeagle"
+    }
+  }
+}
+
+```
+
+
+
+### 8.2 模式守卫
+
+如果想要表达匹配某个范围的数据，需要在模式匹配中增加条件守卫
+
+示例代码如下：
+
+```scala
+package scala.chapter8
+
+object Test02_MatchGuard {
+
+  def main(args: Array[String]): Unit = {
+
+    def abs(x: Int) = x match {
+      case i: Int if i>= 0 => i
+      case j: Int if j<0 => -j
+      case _ => "illegal input"
+    }
+
+    // 类型匹配
+    def describeType(x: Any): String = x match {
+      case i: Int => "Int: " + i
+      case i: String => "String: " + i
+      case i => "Unknown type"
+    }
+    println(abs(9))
+    println(abs(-8))
+    println("类型匹配：" + describeType(9))
+    println("类型匹配：" + describeType("zzzz"))
+  }
+}
+
+```
+
+
+
+### 8.3 模式匹配类型
+
+- 模式匹配支持类型：所有类型字面量，包括字符串、字符、数字、布尔值、甚至数组列表等。
+- 你甚至可以传入`Any`类型变量，匹配不同类型常量。
+- 需要注意默认情况处理，`case _`也需要返回值，如果没有但是又没有匹配到，就抛出运行时错误。默认情况`case _`不强制要求通配符（只是在不需要变量的值建议这么做），也可以用`case abc`一个变量来接住，可以什么都不做，可以使用它的值。
+- 通过指定匹配变量的类型（用特定类型变量接住），可以匹配类型而不匹配值，也可以混用。示例代码见上边的// 类型匹配
+- 需要注意类型匹配时由于泛型擦除，可能并不能严格匹配泛型的类型参数，编译器也会报警告。但`Array`是基本数据类型，对应于java的原生数组类型，能够匹配泛型类型参数。
+
+
+
+#### 8.3.1 匹配...
+
+> 匹配常量、类型、数组、列表、元组、对象以及样例类
+
+示例代码如下：
+
+```scala
+package scala.chapter8
+
+object Test02_MatchTypes {
+
+  def main(args: Array[String]): Unit = {
+
+    // 匹配常量
+    def describeConst(x: Any): String = x match {
+      case 1 => "x is : 1"
+      case "a" => " x is : a"
+      case _ => "unknown x"
+    }
+    println(describeConst(1))
+  }
+
+  // 匹配类型。之前写过这里不写了，但是List会有泛型擦除
+  // case x:List[String] => "is list"
+  // 这里如果x上传List(1,2,3) 也会成功，这就是泛型擦除，只能到List这个粒度
+
+  // 匹配集合类型
+  for (arr <- List(
+    Array(0),
+    Array(1, 0),
+    Array(1, 0, 0),
+    Array("hello", 12)
+  )){
+    val res = arr match {
+      case Array(0) => "array: 0"
+      case Array(1, 0) => "array: 1, 0"
+      case Array(x, y) => "array: " + x +"," + y // 匹配两元素数组
+      case Array(0 , _*) => "array 0 开头"
+      case _ => "unknown x"
+    }
+    println(res)
+  }
+
+  val first :: second :: rest = List(1,2,33,44,55)
+  println(s"first is : $first, second is : $second , rest is : $rest")
+}
+
+```
+
+
+
+- List 匹配和Array差不多，也很灵活。还可用用集合类灵活的运算符来匹配。
+  - 比如使用`::`运算符匹配`first :: second :: rest`，将一个列表拆成三份，第一个第二个元素和剩余元素构成的列表。
+- 注意模式匹配不仅可以通过返回值当做表达式来用，也可以仅执行语句类似于传统`switch-case`语句不关心返回值，也可以既执行语句同时也返回。
+- 元组匹配：
+  - 可以匹配n元组、匹配元素类型、匹配元素值。如果只关心某个元素，其他就可以用通配符或变量。
+  - 元组大小固定，所以不能用`_*`。
+
+
+
+
+
+#### 8.3.2 匹配对象及样例类
+
+匹配对象：
+
+- 对象内容匹配。
+- 直接`match-case`中匹配对应引用变量的话语法是有问题的。编译报错信息提示：不是样例类也没有一个合法的`unapply/unapplySeq`成员实现。
+- 要匹配对象，需要实现伴生对象`unapply`方法，用来对对象属性进行拆解以做匹配。
+
+样例类：
+
+- 第二种实现对象匹配的方式是样例类。
+- `case class className`定义样例类，会直接将打包`apply`和拆包`unapply`的方法直接定义好。
+- 样例类定义中主构造参数列表中的`val`甚至都可以省略，如果是`var`的话则不能省略，最好加上的感觉，奇奇怪怪的各种边角简化。
+
+```scala
+// 这是不使用样例类的方法
+package scala.chapter8
+
+object Test04_MatchObject {
+
+  def main(args: Array[String]): Unit = {
+
+    val stu1 = new Student("Ryze", 19)
+
+    val res = stu1 match {
+      case Student("Ryze", 19) => println("yes")  // 匹配成功时输出 "yes"
+      case _ => println("no")  // 其他情况输出 "no"
+    }
+    // 由于case语句中的println已经输出了内容，res 其实是 Unit 类型
+    println(res)  // 这里会打印出 res 的结果，实际上是 `()`，因为 println 输出了 Unit
+  }
+}
+
+class Student(val name: String, val age: Int)
+
+// 定义伴生对象
+object Student {
+  def apply(name: String, age: Int): Student = new Student(name, age)
+
+  // 定义 unapply 方法进行模式匹配解构
+  def unapply(student: Student): Option[(String, Int)] = {
+    if (student == null) {
+      None
+    } else {
+      Some((student.name, student.age))  // 返回 Some 包裹的元组
+    }
+  }
+}
+
+```
+
+以下代码为使用样例类
+
+```scala
+// 使用样例类
+
+package scala.chapter8
+
+object Test05_MatchCaseClass {
+
+  def main(args: Array[String]): Unit = {
+
+    val stu1 = Student1("Kasha", 21)
+    val res = stu1 match {
+      case Student1("Kasha", 21) => "yes"
+      case _ => "no"
+    }
+    println(res)
+  }
+}
+
+// 定义样例类后，apply 和 unapply方法自动生成
+case class Student1(val name: String, val age: Int)
+```
+
+
+
+**样例类详解**：
+
+`case class` 是 Scala 提供的一种类，通常用于不可变对象的定义。与普通类不同，样例类在编译时会自动生成一些常用的方法，如：
+
+- `apply` 方法，用于简化对象的创建。
+- `unapply` 方法，用于在模式匹配中提取对象的内容。
+- `toString` 方法，用于返回对象的字符串表示。
+- `equals` 和 `hashCode` 方法，用于比较对象是否相等。
+
+
+
+
+
+### 8.4 声明变量中的模式匹配
+
+- 变量声明也可以是一个模式匹配的过程。
+- 元组常用于批量赋值。
+- `val (x, y) = (10, "hello")`
+- `val List(first, second, _*) = List(1, 3, 4, 5)`
+- `val List(first :: second :: rest) = List(1, 2, 3, 4)`
+
+
+
+
+
+### 8.5 for表达式中的模式匹配
+
+`for`推导式中也可以进行模式匹配：
+
+- 元组中取元素时，必须用`_1 _2 ...`，可以用元组赋值将元素赋给变量，更清晰一些。
+- `for ((first, second) <- tupleList)`
+- `for ((first, _) <- tupleList)`
+- 指定特定元素的值，可以实现类似于循环守卫的功能，相当于加一层筛选。比如`for ((10, second) <- tupleList)`
+- 其他匹配也同样可以用，可以关注数量、值、类型等，相当于做了筛选。
+- 元组列表匹配、赋值匹配、`for`循环中匹配非常灵活，灵活运用可以提高代码可读性。
+
+
+
+## 9 异常
+
+scala异常处理整体上的语法和底层处理细节和java非常类似。
+
+java异常处理如下：
+
+- 用`try`语句包围要捕获异常的块，多个不同`catch`块用于捕获不同的异常，`finally`块中是捕获异常与否都会执行的逻辑。
+
+```java
+package scala.chapter8;
+
+public class Test06_ExceptionJava {
+    public static void main(String[] args) {
+
+        try{
+            int a = 10;
+            int b = 0;
+            int c = a/b;
+        } catch (ArithmeticException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            System.out.println("finally");
+        }
+    }
+}
+/* 代码执行输出如下：
+java.lang.ArithmeticException: / by zero
+	at scala.chapter8.Test06_ExceptionJava.main(Test06_ExceptionJava.java:9)
+finally
+ */
+
+```
+
+scala的异常处理如下：
+
+- `try`包围要捕获异常的内容，`catch`仅仅是关键字，将捕获异常的所有逻辑包围在`catch`块中。`finally`块和java一样都会执行，一般用于对象的清理工作。
+- scala中没有编译期异常，所有异常都是运行时处理。
+- scala中也是用`throw`关键字抛出异常，所有异常都是`Throwable`的子类，`throw`表达式是有类型的，就是`Nothing`。`Nothing`主要用在一个函数总是不能正常工作，总是抛出异常的时候用作返回值类型。
+- java中用了`throws`关键字声明此方法可能引发的异常信息，在scala中对应地使用`@throws[ExceptionList]`注解来声明，用法差不多。
+
+```scala
+package scala.chapter8
+
+object Test06_ExceptionScala {
+
+  def main(args: Array[String]): Unit = {
+
+    try {
+      val n = 10 / 0
+    } catch {
+      case e: ArithmeticException => println(s"ArithmeticException raised.")
+      case e: Exception => println(s"Exception raised.")
+    } finally {
+      println("finally")
+    }
+  }
+}
+
+/* 最终输出如下
+ArithmeticException raised.
+finally
+ */
+```
+
+
+
+
+
+## 10 隐式转换
+
+前面说了很多了，编译器做隐式转换的时机：
+
+- 编译器第一次编译失败时，会在当前环境中查找能让代码编译通过的方法，将类型隐式转换，尝试二次编译。
+
+### 10.1 隐式函数
+
+隐式函数：
+
+- 函数定义前加上`implicit`声明为隐式转换函数。
+- 当编译错误时，编译器会尝试在当前作用域范围查找能调用对应功能的转换规则，这个过程由编译器完成，称之为隐式转换或者自动转换。
+
+
+
+
+
+### 10.2 隐式参数
+
+- 普通方法或者函数中的参数可以通过`implicit`关键字声明为隐式参数，调用方法时，如果传入了，那么以传入参数为准。如果没有传入，编译器会在当前作用域寻找符合条件的隐式值。例子：集合排序方法的排序规则就是隐式参数。
+- 隐式值：
+  - 同一个作用域，相同类型隐式值只能有一个。
+  - 编译器按照隐式参数的类型去寻找对应隐式值，与隐式值名称无关。
+  - 隐式参数优先于默认参数。（也就是说隐式参数和默认参数可以同时存在，加上默认参数之后其实就相当于两个不同优先级的默认参数）
+- 隐式参数有一个很淦的点：
+  - 如果参数列表中只有一个隐式参数，无论这个隐式参数是否提供默认参数，那么如果要用这个隐式参数就应该**将调用隐式参数的参数列表连同括号一起省略掉**。如果调用时又想加括号可以在函数定义的隐式参数列表前加一个空参数列表`()`，那么`()`将使用隐式参数，`()()`将使用默认参数（如果有，没有肯定编不过），`()(arg)`使用传入参数。
+  - 也就是说一个隐式参数时通过是否加括号可以区分隐式参数、默认参数、传入参数三种情况。
+  - 那么如果多参数情况下：隐式参数、默认参数、普通参数排列组合在一个参数列表中混用会怎么样呢？没有试验过，不要这么用，思考这些东西搞什么哦！
+  - 具体要不要加这个柯里化的空参数列表，那看习惯就行。不加可能更好一点，加了可能有点让人费解。
+- 可以进一步简写隐式参数，在参数列表中直接去掉，在函数中直接使用`implicity[Type]`（`Predef`中定义的）。但这时就不能传参数了，有什么用啊？相当于一个在自己作用域范围内起作用的全局量？
+
+
+
+
+
+### 10.3 隐式类
+
+- scala2.10之后提供了隐式类，使用`implicit`声明为隐式类。将类的构造方法声明为隐式转换函数。
+- 也就是说如果编译通不过，就可能将数据直接传给构造转换为对应的类。
+- 隐式函数的一个扩展。
+- 说明：
+  - 所带构造参数有且只能有一个。
+  - 隐式类必须被定义在类或者伴生对象或者包对象中，隐式类不能是顶层的。
+- 同一个作用域定义隐式转换函数和隐式类会冲突，定义一个就行。
+
+
+
+### 10.4 隐式解析机制
+
+隐式解析机制的作用域：
+
+- 首先在**当前代码作用域下**查找隐式实体（隐式方法、隐式类、隐式对象）。
+- 如果第一条规查找隐式对象失败，会继续在**隐式参数的类型的作用域**中查找。
+- 类型的作用域是指该类型相关联的全部伴生对象以及该类型所在包的包对象。
+
+作用：
+
+- 隐式函数和隐式类可以用于扩充类的功能，常用语比如内建类`Int Double String`这种。
+- 隐式参数相当于就是一种更高优先级的默认参数。用于多个函数需要同一个默认参数时，就不用每个函数定义时都写一次默认值了。为了简洁无所不用其极啊真是。
+
+
+
+
+
+## 11 泛型
+
+
 
 12 总结
