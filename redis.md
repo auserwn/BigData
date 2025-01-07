@@ -75,7 +75,7 @@ windows下安装的链接为：https://blog.csdn.net/qq_24718237/article/details
 
 
 
-![](.\redis_image\re1.png)
+![](image\redis_image\re1.png)
 
 
 
@@ -83,7 +83,7 @@ windows下安装的链接为：https://blog.csdn.net/qq_24718237/article/details
 
 key-value型  key一般是String类型，value的类型多种多样。
 
-![](.\redis_image\re2.png)
+![](image\redis_image\re2.png)
 
 
 
@@ -95,7 +95,7 @@ https://redis.io/docs/latest/commands/
 查看通用命令： help @generic
 ```
 
-![](.\redis_image\re3.png)
+![](image\redis_image\re3.png)
 
 
 
@@ -141,9 +141,9 @@ ttl：查看key的剩余有效期 time to live ttl
 
 #### 1.2.3 String类型
 
-![](.\redis_image\re4.png)
+![](image\redis_image\re4.png)
 
-![](.\redis_image\re5.png)
+![](image\redis_image\re5.png)
 
 #### 1.2.3 key的层级
 
@@ -174,7 +174,7 @@ OK
 
 ```
 
-![](.\redis_image\re6.png)
+![](image\redis_image\re6.png)
 
 
 
@@ -182,9 +182,9 @@ OK
 
 hash类型也叫散列，其value是一个无序字典，类似于java中的HashMap结构。
 
-![](.\redis_image\re7.png)
+![](image\redis_image\re7.png)
 
-![](.\redis_image\re8.png)
+![](image\redis_image\re8.png)
 
 
 
@@ -201,7 +201,7 @@ Redis中的List类型和Java中的LinkedList类似，可以看作是一个双向
 - 插入删除快
 - 查询速度一般
 
-![](.\redis_image\re9.png)
+![](image\redis_image\re9.png)
 
 
 
@@ -216,9 +216,9 @@ Redis中的List类型和Java中的LinkedList类似，可以看作是一个双向
 - 查找快
 - 支持交集、并集、差集等功能。
 
-![](.\redis_image\re10.png)
+![](image\redis_image\re10.png)
 
-![](.\redis_image\re11.png)
+![](image\redis_image\re11.png)
 
 
 
@@ -234,7 +234,7 @@ sortedSet具备以下特性： 由于可排序性，经常被用来实现**排�
 - 元素不可重复
 - 查询速度快
 
-![](.\redis_image\re12.png)
+![](image\redis_image\re12.png)
 
 
 
@@ -366,9 +366,9 @@ https://spring.io/projects/spring-data-redis
 
 SpringData是Spring中数据操作的模块，包含了对各种数据库的集成，其中对redis的集成模块叫为SpringDataRedis.
 
-![](.\redis_image\re13.png)
+![](image\redis_image\re13.png)
 
-![](.\redis_image\re14.png)
+![](image\redis_image\re14.png)
 
 ##### 1.3.2.2 SpringDataRedis的序列化方式
 
@@ -404,7 +404,7 @@ RedisTemplate可以接收任意Object作为值写入redis，只不过写之前�
 
 #### 2.2.2 添加Redis缓存
 
-![](.\redis_image\re15.png)
+![](image\redis_image\re15.png)
 
 
 
@@ -412,7 +412,7 @@ RedisTemplate可以接收任意Object作为值写入redis，只不过写之前�
 
 主要有三种：内存淘汰、超时剔除、主动更新
 
-![](.\redis_image\re16.png)
+![](image\redis_image\re16.png)
 
 
 
@@ -449,7 +449,7 @@ RedisTemplate可以接收任意Object作为值写入redis，只不过写之前�
 - 缓存空对象：把值设置为空存到redis。简单粗暴，但是有额外内存消耗，很多垃圾信息，可以加TTL。
 - 布隆过滤：在客户端和redis之间加一层布隆过滤器。内存占用少。实现相对复杂，存在误判可能。
 
-![](.\redis_image\re17.png)
+![](image\redis_image\re17.png)
 
 **缓存穿透的解决方案：**
 
@@ -464,9 +464,9 @@ RedisTemplate可以接收任意Object作为值写入redis，只不过写之前�
 
 
 
-![](.\redis_image\re18.png)
+![](image\redis_image\re18.png)
 
-![](.\redis_image\re19.png)
+![](image\redis_image\re19.png)
 
 
 
@@ -495,7 +495,7 @@ RedisTemplate可以接收任意Object作为值写入redis，只不过写之前�
 - 高性能/高并发：
 - 安全性：
 
-![](.\redis_image\re20.png)
+![](image\redis_image\re20.png)
 
 
 
@@ -588,11 +588,11 @@ Background saving started
 bgsave是后台执行。开启子进程执行RDB。避免对主进程造成影响。
 ```
 
-![](.\redis_image\re21.png)
+![](image\redis_image\re21.png)
 
 
 
-![](.\redis_image\re22.png)
+![](image\redis_image\re22.png)
 
 优先级来说：AOF>RDB 
 
@@ -606,7 +606,7 @@ RDB也可以作为备份存在，容灾
 
 
 
-![](.\redis_image\re23.png)
+![](image\redis_image\re23.png)
 
 
 
@@ -616,19 +616,19 @@ RDB也可以作为备份存在，容灾
 
 
 
-![](.\redis_image\re24.png)
+![](image\redis_image\re24.png)
 
-![](.\redis_image\re25.png)
+![](image\redis_image\re25.png)
 
 
 
-![](.\redis_image\re26.png)
+![](image\redis_image\re26.png)
 
 主从第一次同步是全量同步，但是如果slave重启后同步，则执行增量同步。
 
 以下是增量同步原理
 
-![](.\redis_image\re27.png)
+![](image\redis_image\re27.png)
 
 增量同步失败的场景：slave宕机太久，repl_backlog超过了上限进行了覆盖，则只能进行全量同步然后再增量同步。
 
@@ -650,33 +650,33 @@ RDB也可以作为备份存在，容灾
 
 redis提供了哨兵Sentinel机制来实现主从集群的自动故障恢复。
 
-![](.\redis_image\re28.png)
+![](image\redis_image\re28.png)
 
-![](.\redis_image\re29.png)
+![](image\redis_image\re29.png)
 
 选取新的mater
 
-![](.\redis_image\re30.png)
+![](image\redis_image\re30.png)
 
 故障转移的实现：
 
-![](.\redis_image\re31.png)
+![](image\redis_image\re31.png)
 
 
 
 ### 3.4 redis分片集群
 
-![](.\redis_image\re32.png)
+![](image\redis_image\re32.png)
 
 
 
-![](.\redis_image\re33.png)
+![](image\redis_image\re33.png)
 
-![](.\redis_image\re34.png)
+![](image\redis_image\re34.png)
 
 
 
-![](.\redis_image\re35.png)
+![](image\redis_image\re35.png)
 
 
 
@@ -686,7 +686,7 @@ redis提供了哨兵Sentinel机制来实现主从集群的自动故障恢复。
 
 多级缓存方案
 
-![](.\redis_image\re36.png)
+![](image\redis_image\re36.png)
 
 
 
