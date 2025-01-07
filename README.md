@@ -13,3 +13,4 @@ kafka flink
 
 redis
 
+OLAP：GreenPlum Doris StarRocks Pammin
