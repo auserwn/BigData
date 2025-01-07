@@ -6,13 +6,13 @@ spark是基于MR开发的
 
 分布式计算：切分数据 减小数据规模 
 
-![](.\spark_image\sparkjichu-2.png)
+![](image\spark_image\sparkjichu-2.png)
 
 框架：写完jar包，需要submit提交到context进行执行。
 
 
 
-![](.\spark_image\sparkjichu-1.png)
+![](image\spark_image\sparkjichu-1.png)
 
 
 
@@ -32,7 +32,7 @@ RDD 一定是个对象，封装了大量的方法和属性，适合分布式处�
 
 
 
-![](.\spark_image\sparkcore-2.png)
+![](image\spark_image\sparkcore-2.png)
 
 是Driver端将数据和计算逻辑封装传递给Executor端，计算逻辑是在master端产生的。
 
@@ -48,7 +48,7 @@ RDD和字符串的区别：
 
 
 
-![](.\spark_image\rdd1.png)
+![](image\spark_image\rdd1.png)
 
 RDD适合分布式计算,存在多个分区-切片计算.
 
@@ -167,9 +167,9 @@ map方法[映射转换]：
 
 如果java中使用注解FunctionalInterface声明，那么接口的使用可以采用JDK提供的函数式编程语法-lambda实现
 
- ![](.\spark_image\sparkrdd-1.png)
+ ![](image\spark_image\sparkrdd-1.png)
 
-![](.\spark_image\sparkrdd-2.png)
+![](image\spark_image\sparkrdd-2.png)
 
 示例代码如下：
 
@@ -337,13 +337,13 @@ JavaPairRDD<Object, Iterable<Integer>> grdd = rdd.groupBy(new Function<Integer, 
 
 默认情况下,数据处理后,所在的分区不发生变化,但是groupBy方法例外.Spark在数据处理时,要求同一个组的数据必须在同一个分区中.所以分组操作会将数据分区打乱重新组合.
 
-![](.\spark_image\sparkrdd-3.png)
+![](image\spark_image\sparkrdd-3.png)
 
 上述操作在spark中称为shuffle.
 
 spark要求所有的数据必须分组后才能继续执行后续操作.
 
-![](.\spark_image\sparkrdd-4.png)
+![](image\spark_image\sparkrdd-4.png)
 
 
 
@@ -783,7 +783,7 @@ JavaPairRDD rdd_new_vsort = javaPairRDD.sortByKey();
 
 ##### 1.3.7.7 reduceByKey和groupByKey的区别
 
-![](.\spark_image\rdd-5.png)
+![](image\spark_image\rdd-5.png)
 
 真正影响性能的其实是这里的shuffle 所以上下性能差距没那么大。如何优化shuffle呢？
 
@@ -795,7 +795,7 @@ shuffle慢是因为读写磁盘太慢了
 
 
 
-![](.\spark_image\rdd6.png)
+![](image\spark_image\rdd6.png)
 
 
 
@@ -857,7 +857,7 @@ rdd_map.collect().forEach(System.out::println);
 
 collect方法就是将Executor端执行的结果按照分区的顺序拉取到Driver端。
 
-![](.\spark_image\rdd-collect.png)
+![](image\spark_image\rdd-collect.png)
 
 解释：
 
@@ -1071,7 +1071,7 @@ spark中每个RDD都保存了依赖关系和血缘关系。
 
 查看rdd的方法：rdd.toDebugString()  -前边(16)代表分区数 rdd记录了血缘关系
 
-![](.\spark_image\rdd_dep_1.png)
+![](image\spark_image\rdd_dep_1.png)
 
 
 
@@ -1101,7 +1101,7 @@ RDD的依赖关系本质上不是RDD对象的关系，而是RDD对象中分区�
 
 下图为例，此job拥有前后三个rdd，但是task数量为2+2，其中rdd2对应2个+rdd3对应2个。
 
-![](.\spark_image\rdd7.png)
+![](image\spark_image\rdd7.png)
 
 
 
@@ -1111,11 +1111,11 @@ RDD的依赖关系本质上不是RDD对象的关系，而是RDD对象中分区�
 
 应用背景：有重用的RDD 怎么做
 
-![](.\spark_image\rdd8.png)
+![](image\spark_image\rdd8.png)
 
 但是上述操作注意RDD不保存数据，rdd只是保存了血缘和依赖，还是会出现计算重复，比如走了reduceByKey数据，数据走一遍，如果计算下边的groupByKey还得从头计算一遍，导致计算重复。所以解决方案是，对mapToPair的RDD结果进行保存。避免再从头计算一遍。所以只需要mapToPair.cache()。
 
-![](.\spark_image\rdd9.png)
+![](image\spark_image\rdd9.png)
 
 持久化方式：
 
@@ -1363,7 +1363,7 @@ udf函数是每一行数据都会用一次，一行一行处理
 
 类似map 一行入一行出
 
-![](.\spark_image\sparksql-1.png)
+![](image\spark_image\sparksql-1.png)
 
 
 
@@ -1377,7 +1377,7 @@ udaf函数底层中需要存在一个**缓冲区**，用于存放临时数据，
 
 spark3.x推荐使用extends Aggregator自定义UDAF，属于强类型的DataSet方式。
 
-![](.\spark_image\sparksql-2.png)
+![](image\spark_image\sparksql-2.png)
 
 
 
@@ -1521,7 +1521,7 @@ public class SparkSQL03_SQL {
 
 列式存储如下：查询效率不高，但是做聚合统计效率高。
 
-![](.\spark_image\sparksql-3.png)
+![](image\spark_image\sparksql-3.png)
 
 
 
@@ -1610,7 +1610,7 @@ public class SparkSQL04_Source_hive {
 
 sparkStreaming实际上就是将无界数据流切分为有界数据流 方便计算
 
-![](.\spark_image\sparkStreaming-1.png)
+![](image\spark_image\sparkStreaming-1.png)
 
 sparkStreaming底层实际上还是sparkCore
 
@@ -1630,7 +1630,7 @@ spark是批量 离线数据处理框架
 
 sparkStreaming是微批量 准实时数据处理框架
 
-![](.\spark_image\sparkStreaming-2.png)
+![](image\spark_image\sparkStreaming-2.png)
 
 上图中解析：
 
@@ -1642,7 +1642,7 @@ sparkStreaming是微批量 准实时数据处理框架
 
 
 
-![](.\spark_image\sparkStreaming-3.png)
+![](image\spark_image\sparkStreaming-3.png)
 
 ### 4.1 实现
 
@@ -1692,7 +1692,7 @@ public class SparkStreaming02_socket {
 
 ### 4.2 与Kafka对接
 
-![](.\spark_image\sparkStreaming-4.png)
+![](image\spark_image\sparkStreaming-4.png)
 
 DStream确实是对RDD的封装，但是不是所有方法都进行了封装。有些方法不能使用：sortBy sortByKey
 
@@ -1714,7 +1714,7 @@ DStream确实是对RDD的封装，但是不是所有方法都进行了封装。�
 
 ### 4.4 DStream
 
-![](.\spark_image\sparkStreaming-5.png)
+![](image\spark_image\sparkStreaming-5.png)
 
 
 
