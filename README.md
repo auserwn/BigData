@@ -9,8 +9,10 @@ BigDataStudy:redis spark hadoop scala flink kafka flume...
 
 hadoop hive spark scala 
 
-kafka flink
+kafka flume flink
 
 redis
 
-OLAP：GreenPlum Doris StarRocks Pammin
+数据湖相关
+
+OLAP：GreenPlum Doris StarRocks Pammin Icebeg
