@@ -704,6 +704,131 @@ kafka采用从broker中主动拉取数据。考虑到不同消费者的消费速
 
 
 
+##### 5.3.1 消费一个主题
+
+需求：创建一个独立消费者，消费
+
+【 订阅主题：kafkaConsumer.subscribe】
+
+示例代码如下：
+
+```java
+package kafka.consumer;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Properties;
+
+public class CustomConsumer {
+
+    public static void main(String[] args) {
+
+        // 配置:连接、反序列化
+        Properties properties = new Properties();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        // 消费者注意增加消费者组
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG,"auserwn0108");
+        // 消费者
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(properties);
+        // 订阅主题
+        ArrayList<String> topics = new ArrayList<String>();
+        topics.add("test");
+        kafkaConsumer.subscribe(topics);
+        // 消费数据
+        while(true){
+            ConsumerRecords<String, String> poll = kafkaConsumer.poll(Duration.ofSeconds(1));
+            for (ConsumerRecord<String, String> stringStringConsumerRecord : poll) {
+                System.out.println(stringStringConsumerRecord);
+            }
+        }
+    }
+}
+
+```
+
+
+
+##### 5.3.2 消费一个分区
+
+【订阅分区：kafkaConsumer.assign】
+
+示例代码如下：
+
+```java
+package kafka.consumer;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Properties;
+
+public class CustomConsumerPartition {
+
+    public static void main(String[] args) {
+
+        // 配置:连接、反序列化
+        Properties properties = new Properties();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        // 消费者注意增加消费者组
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG,"auserwn0108");
+        // 消费者
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(properties);
+        // 订阅主题分区
+        ArrayList<TopicPartition> topicPartitions = new ArrayList<TopicPartition>();
+        topicPartitions.add(new TopicPartition("test",0));
+        kafkaConsumer.assign(topicPartitions);
+        // 消费数据
+        while(true){
+            ConsumerRecords<String, String> poll = kafkaConsumer.poll(Duration.ofSeconds(1));
+            for (ConsumerRecord<String, String> stringStringConsumerRecord : poll) {
+                System.out.println(stringStringConsumerRecord);
+            }
+        }
+    }
+}
+
+```
+
+
+
+##### 5.3.3 消费者组案例
+
+消费者组设置：`properties.put(ConsumerConfig.GROUP_ID_CONFIG,"auserwn0108");`
+
+主要是组内不同消费者消费不同分区数据，这里暂时不做演示，可以在同一消费者组下创建多个消费者，进行消费数据。
+
+
+
+##### 5.3.4 分区的分配以及再平衡
+
+> 一个消费者组中有多个customer组成，一个topic有多个partition分区组成，现在的问题是：到底由哪个consumer来消费哪个partition分区的数据。即customer和partition的对应问题。
+
+kafka有四种主流的分区策略：Range、RoundRobin、Sticky、CooperativeSticky。
+
+可以通过`partition.assignment.strategy`，修改分区的分配策略。默认策略是：Range+CooperativeSticky。kafka可以同时使用多个分区策略。
+
+分区分配策略如下：
+
+![](image\Kafka_image\k_1_12.png)
+
+
+
 
 
 ## 2 外部系统集成
