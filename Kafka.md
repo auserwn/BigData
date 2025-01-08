@@ -6,9 +6,13 @@
 
 进度：
 20250106  [6,9]是linux下集群安装，这里没做笔记，简单看了一遍，感觉实用性很低，看完就忘。
-20250108  [33,40]没看
+20250108  [33,40]没看 51开始
 
 ```
+
+
+
+[TOC]
 
 
 
@@ -819,7 +823,12 @@ public class CustomConsumerPartition {
 
 > 一个消费者组中有多个customer组成，一个topic有多个partition分区组成，现在的问题是：到底由哪个consumer来消费哪个partition分区的数据。即customer和partition的对应问题。
 
-kafka有四种主流的分区策略：Range、RoundRobin、Sticky、CooperativeSticky。
+kafka有四种主流的分区策略：**Range、RoundRobin、Sticky、CooperativeSticky**。
+
+- Range：对同一个topic里的分区按照序号进行排序，并且对消费者按照字母顺序进行排序。通过partition数/consumer数决定每个消费者消费几个分区，如果除不尽，则前边的多消费1个分区。注意：如果有多个topic，每个topic前边的consumer都多消费一个分区，随着topic越多，那么c0消费的分区越多。就容易产生**数据倾斜**。
+- RoundRobin：针对集群中所有的topic而言。**轮询分区策略**：是把所有的partition和所有的consumer都列出来，然后按照hashcode进行排序，最后通过轮询算法来分配给partition给到各个消费者。
+- Sticky：
+- CooperativeSticky：
 
 可以通过`partition.assignment.strategy`，修改分区的分配策略。默认策略是：Range+CooperativeSticky。kafka可以同时使用多个分区策略。
 
