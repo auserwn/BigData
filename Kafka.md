@@ -6,7 +6,7 @@
 
 进度：
 20250106  [6,9]是linux下集群安装，这里没做笔记，简单看了一遍，感觉实用性很低，看完就忘。
-20250108  [33,40]没看 51开始
+20250108  [33,40]没看 59开始
 
 ```
 
@@ -819,7 +819,7 @@ public class CustomConsumerPartition {
 
 
 
-##### 5.3.4 分区的分配以及再平衡
+#### 5.4 分区的分配以及再平衡
 
 > 一个消费者组中有多个customer组成，一个topic有多个partition分区组成，现在的问题是：到底由哪个consumer来消费哪个partition分区的数据。即customer和partition的对应问题。
 
@@ -827,7 +827,7 @@ kafka有四种主流的分区策略：**Range、RoundRobin、Sticky、Cooperativ
 
 - Range：对同一个topic里的分区按照序号进行排序，并且对消费者按照字母顺序进行排序。通过partition数/consumer数决定每个消费者消费几个分区，如果除不尽，则前边的多消费1个分区。注意：如果有多个topic，每个topic前边的consumer都多消费一个分区，随着topic越多，那么c0消费的分区越多。就容易产生**数据倾斜**。
 - RoundRobin：针对集群中所有的topic而言。**轮询分区策略**：是把所有的partition和所有的consumer都列出来，然后按照hashcode进行排序，最后通过轮询算法来分配给partition给到各个消费者。
-- Sticky：
+- Sticky：粘性分区首先会尽量均衡的放置分区到消费者上面，在出现同一消费者组内消费者提出问题的时候，会尽量保持原有分配的分区不变化。
 - CooperativeSticky：
 
 可以通过`partition.assignment.strategy`，修改分区的分配策略。默认策略是：Range+CooperativeSticky。kafka可以同时使用多个分区策略。
@@ -837,6 +837,54 @@ kafka有四种主流的分区策略：**Range、RoundRobin、Sticky、Cooperativ
 ![](image\Kafka_image\k_1_12.png)
 
 
+
+#### 5.5 offset位移
+
+##### 5.5.1 offset的默认维护位置
+
+0.9版本之前在zookeeper中
+
+0.9版本之后在topic中：_consumer_offsets 其中的key是group.id+topic+分区号，value是当前的offset值。
+
+
+
+##### 5.5.2 自动提交offset
+
+offset自动提交流程如下：
+
+![](image\Kafka_image\k_1_13.png)
+
+
+
+##### 5.5.3 手动提交offset
+
+两种方式：同步提交 和 异步提交：
+
+- commitSync同步提交：必须等待offset提交完毕，再去消费下一批数据。
+- commitAsync异步提交：发送完offset请求后，就开始消费下一批数据。
+
+
+
+##### 5.5.4 指定offset/时间消费
+
+
+
+##### 5.5.6 重复消费和漏消费
+
+场景：
+
+![](image\Kafka_image\k_1_14.png)
+
+
+
+#### 5.6 消费者事务
+
+
+
+#### 5.7 数据积压
+
+- 如果是Kafka消费能力不足，则可以考虑增加Topic的分区数，同时提升消费组的消费者数量，消费者数=分区数。
+- 如果是下游的数据处理不及时：提高每批次拉取的数量。
 
 
 
