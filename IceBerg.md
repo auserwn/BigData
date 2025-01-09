@@ -15,3 +15,10 @@ IceBerg
 数据存储、计算引擎插件化：提供表格式Table Format实现方案，常见的存储HDFS S3 和计算引擎 Flink Spark都可以接入IceBerg。
 
 实时流批一体。
+
+
+
+### 1.3 与其他数据湖对比
+
+![](image\Iceberg_image\i_1.png)
+
