@@ -7,7 +7,7 @@
 进度：
 20250106  [6,9]是linux下集群安装，这里没做笔记，简单看了一遍，感觉实用性很低，看完就忘。
 20250108  [33,40]没看 59开始
-
+20250109  68开始
 ```
 
 
@@ -888,7 +888,53 @@ offset自动提交流程如下：
 
 
 
+### 6 Kafka-Eagle监控
+
+这个类似gpcc监控kafka集群，会显示topics、customer、producer等信息。这里不做部署展示。
+
+
+
+### 7 Kafka-Kraft模式
+
+如何不使用zookeeper？脱离kafka！2.8.0以后。
+
+
+
+#### 7.1 Kraft架构
+
+![](image\Kafka_image\k_1_15.png)
+
+好处：
+
+- kafka不再依赖外部架构，而是能够独立运行。
+
+
+
+
+
 ## 2 外部系统集成
+
+
+
+### 1 集成Flume
+
+Source Channel Sink
+
+Flume既可以作为Kafka的生产者，也可以作为Kafka的消费者。
+
+#### 1.1 Flume生产者
+
+
+
+
+
+
+
+#### 1.2 Flume消费者
+
+
+
+
 
 
 
