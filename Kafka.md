@@ -54,6 +54,18 @@ cmd下>docker ps -a可以查看运行状态
 
 
 
+2 windows kafkatool
+
+```
+windows版模拟kafkatool
+通过网盘分享的文件：kafkatool_64bit.exe
+链接: https://pan.baidu.com/s/1ZOUHzkp9qf_d-w8gdTECdw 提取码: z73i
+```
+
+
+
+
+
 ## 1 基础入门
 
 
