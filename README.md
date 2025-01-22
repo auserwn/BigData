@@ -15,4 +15,4 @@ redis
 
 数据湖相关
 
-OLAP：GreenPlum Doris StarRocks Pammin Icebeg
+OLAP：GreenPlum Doris StarRocks Paimon Iceberg
