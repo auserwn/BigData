@@ -86,7 +86,14 @@ C:\Users\auserwn>scala
 Welcome to Scala 2.12.15 (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_261).
 Type in expressions for evaluation. Or try :help.
 
+```
 
+
+
+windows本地编译运行环境搭建可以参考：
+
+```
+https://mp.csdn.net/mp_blog/creation/editor/145264313
 ```
 
 
