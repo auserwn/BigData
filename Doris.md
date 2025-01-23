@@ -279,3 +279,57 @@ PROPERTIES (
 );
 ```
 
+解读：
+
+- replication_num：由于半数机制，强烈建议为奇数。类似greenplum中副本的个数。 副本是分布在不同节点上的。对于小的不常更新的维度表，可以设置更多的副本数，这样做join时大概率进行本地数据join。
+- storage_medium & storage_cooldown_time：BE的数据存储目录可以显式的指定为 SSD 或者 HDD（通过 .SSD 或者 .HDD 后缀区分）。建表时，可以统一指定所有 Partition 初始存储的介质。注意，后缀作用是显式指定磁盘介质，而不会检查是否与实际介质类型相符。默认初始存储介质可通过fe的配置文件fe.conf 中指定 default_storage_medium=xxx如果没有指定，则默认为 HDD。如果指定为 SSD，则数据初始存放在 SSD上。如果没有指定storage_cooldown_time，则默认 30天后，数据会从 SSD自动迁移到 HDD 上。如果指定了 storage_cooldown_time，则在到达 storage_cooldown_time时间后，数据才会迁移。
+
+
+
+#### 3.4.4 ENGINE
+
+```
+建表语句中：ENGINE=OLAP
+```
+
+默认的 ENGINE类型为OLAP。类型。在 Doris中，只有这个ENGINE 类型是由 Doris负责数据管理和存储的。其他 ENGINE类型，如 mysql、 broker、es等等，本质上只是对外部其他数据库或系统中的表的映射，以保证 Doris可以读取这些数据。而 Doris本身并不创建、管理和存储任何非 olap ENGINE 类型的表和数据。
+
+
+
+### 3.5 数据模型
+
+Doris 的数据模型主要分为 3类 Aggregate、 Uniq、 Duplicate。
+
+
+
+#### 3.5.1 Aggregate
+
+聚合模型。要考虑 key列和value列。
+
+当我们导入数据时，对于Key列相同的行会聚合成一行，而 Value列会按照设置的AggregationType进行聚合。
+
+目前有以下四种聚合方式：
+
+- SUM：求和，多行的 Value进行累加。
+- REPLACE：替代，下一批数据中的 Value会替换之前导入过的行中的 Value。
+  REPLACE_IF_NOT_NULL 当遇到 null值则不更新。
+- MAX：保留最大值。
+- MIN：保留最小值。
+
+数据的聚合，在Doris 中有如下三个阶段发生：
+
+- 每一批次数据导入的 ETL 阶段。该阶段会在每一批次导入的数据内部进行聚合。
+- 底层 BE 进行数据 Compaction 的阶段。该阶段， BE 会对已导入的不同批次的数据进行进一步的聚合。
+- 数据查询阶段。在数据查询时，对于查询涉及到的数据，会进行对应的聚合。
+
+数据在不同时间，可能聚合的程度不一致。比如一批数据刚导入时，可能还未与之前已存在的数据进行聚合。但是对于用户而言，用户只能查询到聚合后的数据。即不同的聚合程度对于用户查询而言是透明的。用户需始终认为数据以最终的完成的聚合程度存在，而不应假设某些聚合还未发生。（可参阅聚合模型的局限性一节获得更多详情。）
+
+
+
+3.5.2 Uniqe
+
+
+
+
+
+3.5.3 Duplicate
