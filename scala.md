@@ -12,6 +12,11 @@
 20241231: 137异常开始看
 
 跳过的部分[28,47]
+
+
+scala电子版书籍：
+https://github.com/xiaozhiliaoo/ScalaBooks?tab=readme-ov-file#Chinese-Book
+https://pan.baidu.com/share/init?surl=N67CtkoYiHhdxQW5zO0VYQ 提取码:zzqu
 ```
 
 
