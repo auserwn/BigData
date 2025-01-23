@@ -117,6 +117,10 @@ IceBerg的分区信息和表数据存储目录是独立的，使得IceBerg的表
 
 
 
+![](image\Iceberg_image\i4.png)
+
+
+
 ### 2.1 数据文件data files
 
 数据文件是Apache Iceberg表真实存储数据的文件，一般是在表的数据存储目录的data目录下，如果我们的文件格式选择的是parquet,那么文件是以“.parquet”结尾。例如：00000-0-atguigu_20230203160458_22ee74c9-643f-4b27-8fc1-9cbd5f64dad4-job_1675409881387_0007-00001.parquet就是一个数据文件。Iceberg每次更新会产生多个数据文件（data files）。
@@ -137,9 +141,9 @@ manifest list是一个元数据文件，它列出构建表快照（Snapshot）�
 
 
 
-### 2.4清单文件Manifest 
+### 2.4清单文件Manifest file
 
-fileManifest file也是一个元数据文件，它列出组成快照（snapshot）的数据文件（data files）的列表信息。每行都是每个数据文件的详细描述，包括数据文件的状态、文件路径、分区信息、列级别的统计信息（比如每列的最大最小值、空值数等）、文件的大小以及文件里面数据行数等信息。其中列级别的统计信息可以在扫描表数据时过滤掉不必要的文件。Manifest file是以avro格式进行存储的，以“.avro”后缀结尾，例如：52f2f477-2585-4e69-be42-bbad9a46ed17-m0.avro。
+Manifest file也是一个元数据文件，它列出组成快照（snapshot）的数据文件（data files）的列表信息。每行都是每个数据文件的详细描述，包括数据文件的状态、文件路径、分区信息、列级别的统计信息（比如每列的最大最小值、空值数等）、文件的大小以及文件里面数据行数等信息。其中列级别的统计信息可以在扫描表数据时过滤掉不必要的文件。Manifest file是以avro格式进行存储的，以“.avro”后缀结尾，例如：52f2f477-2585-4e69-be42-bbad9a46ed17-m0.avro。
 
 
 
