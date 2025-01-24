@@ -7,6 +7,7 @@
 
 第二章 4-14未看部署
 20250123 看到了18
+20250125 看到了31
 ```
 
 
@@ -354,5 +355,63 @@ Uniq 模型完全可以用聚合模型中的 REPLACE 方式替代。其内部的
 
 参数解释：
 
-- dynamic_partition.create_history_partition 
-- .history_partition_num 用于指定创建历史分区数量。默认值为-1即未设置。
+- dynamic_partition.create_history_partition 默认false，设置为true时，自动创建符合条件的历史分区。
+- dynamic_partition.history_partition_num 用于指定创建历史分区数量(当create_history_partition=true时才有效)。默认值为-1即未设置。
+- dynamic_partition.hot_partition_num 指定最新的多少分区为热分区，对于热分区，系统自动设置其优先存储介质storage_medium参数为SSD，并且设置storage_cooldown_time。这个参数是设置往前n天和未来所有分区。
+
+![](image\doris_image\d3.png)
+
+- 
+
+
+
+#### 3.6.4 示例
+
+创建动态分区，按照天分区，只保留历史七天的分区，并且预先创建未来三天的分区。
+
+```
+create table student_dynamic_partition1
+(id
+time date,
+name varchar(50),
+age int
+)
+duplicate key(id,time)
+PARTITION BY RANGE(time)()
+DISTRIBUTED BY HASH(id) buckets 10
+PROPERTIES(
+"dynamic_partition.enable" = "true",
+dynamic_partition.time_unit" = "DAY", --时间单位
+"dynamic_partition.start" = "-7",  --起始便宜，保留最近七天
+"dynamic_partition.end" = "3",  --创建未来三天
+"dynamic_partition.prefix" = "p", --前缀
+"dynamic_partition.buckets" = "10", --自动分桶数
+"replication_num" = "1"  --副本数  表的副本数和自动分区的副本数可以不一样
+);
+```
+
+插入数据查看表情况：
+
+```
+查看分区调度情况：
+SHOW DYNAMIC PARTITION TABLES;
+查看表分区：
+SHOW PARTITIONS FROM student_dynamic_partition1;
+```
+
+
+
+### 3.7 Rollup
+
+更粗粒度的聚合。
+
+#### 3.7.1 基本概念
+
+用户通过建表语句创建出来的表称为 Base表（ Base Table）。 Base 表中保存着按用户建表语句指定的方式存储的基础数据。
+在Base表之上，我们可以创建任意多个 ROLLUP表。这些 ROLLUP的数据是基于 Base 表产生的，并且在物理上是**独立存储**的。ROLLUP表的基本作用，在于在 Base表的基础上，获得**更粗粒度**的聚合数据。
+
+
+
+
+
+### 3.8 物化视图
