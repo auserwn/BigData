@@ -39,3 +39,23 @@ K-V、NOSQL数据库:HBase、Redis、MongoDB
 任务调度:Oozie
 ```
 
+
+
+
+
+temp-20250124
+
+```
+整体步骤：
+确定主题
+信息收集：已有的研报库+数据抓取+用户输入[上传、文本复制、url]
+
+生成
+图片或者表格生成-依赖前端实现方式。
+
+AI4Finance-Foundation有一些获取公司信息的接口，可以看一下。
+
+其他研报资源可以研究下：
+https://www.fxbaogao.com/rp?order=2&nop=-1
+```
+
