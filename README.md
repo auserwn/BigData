@@ -57,5 +57,7 @@ AI4Finance-Foundation有一些获取公司信息的接口，可以看一下。
 
 其他研报资源可以研究下：
 https://www.fxbaogao.com/rp?order=2&nop=-1
+洞见研报：https://www.djyanbao.com/index
+wind：
 ```
 
