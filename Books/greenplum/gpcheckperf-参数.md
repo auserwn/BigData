@@ -1,0 +1,100 @@
+
+
+
+
+```bash
+基于gpcheckperf的数据库性能测试
+
+gpcheckperf 工具主要分为以下几个阶段
+
+[gpadmin@gsgp60 gpcheckperfTest]$ /usr/local/greenplum-db/bin/gpcheckperf -d pgbench -h gsgp61 -h gsgp62
+/usr/local/greenplum-db/bin/gpcheckperf -d pgbench -h gsgp61 -h gsgp62
+--------------------
+--  DISK WRITE TEST
+--------------------
+
+--------------------
+--  DISK READ TEST
+--------------------
+
+--------------------
+--  STREAM TEST
+--------------------
+
+-------------------
+--  NETPERF TEST
+-------------------
+
+====================
+==  RESULT 2023-05-18T18:43:52.045025
+====================
+
+ disk write avg time (sec): 504.47
+ disk write tot bytes: 134058082304
+ disk write tot bandwidth (MB/s): 258.55
+ disk write min bandwidth (MB/s): 111.08 [gsgp61]
+ disk write max bandwidth (MB/s): 147.47 [gsgp62]
+
+
+ disk read avg time (sec): 488.69
+ disk read tot bytes: 134058082304
+ disk read tot bandwidth (MB/s): 266.70
+ disk read min bandwidth (MB/s): 114.94 [gsgp61]
+ disk read max bandwidth (MB/s): 151.76 [gsgp62]
+
+
+ stream tot bandwidth (MB/s): 13544.90
+ stream min bandwidth (MB/s): 6746.20 [gsgp61]
+ stream max bandwidth (MB/s): 6798.70 [gsgp62]
+
+Netperf bisection bandwidth test --网络性能测试方法，用于测试网络中两个节点之间的带宽和延迟性能。
+gsgp61 -> gsgp62 = 112.370000
+gsgp62 -> gsgp61 = 112.340000
+
+Summary:
+sum = 224.71 MB/sec
+min = 112.34 MB/sec
+max = 112.37 MB/sec
+avg = 112.36 MB/sec
+median = 112.37 MB/sec --内存带宽测试的中位数测试结果为 112.37 MB/s
+
+
+
+[gpadmin@gsgp60 gpcheckperfTest]$ /usr/local/greenplum-db/bin/gpcheckperf -d ./pgbench -r dsN -h gsgp61 -h gsgp62 -v
+====================
+==  RESULT 2023-05-18T20:28:03.982415
+====================
+
+ disk write avg time (sec): 461.80
+ disk write tot bytes: 134058082304
+ disk write tot bandwidth (MB/s): 280.31
+ disk write min bandwidth (MB/s): 124.58 [gsgp61]
+ disk write max bandwidth (MB/s): 155.73 [gsgp62]
+
+
+ disk read avg time (sec): 435.76
+ disk read tot bytes: 134058082304
+ disk read tot bandwidth (MB/s): 300.44
+ disk read min bandwidth (MB/s): 127.22 [gsgp61]
+ disk read max bandwidth (MB/s): 173.22 [gsgp62]
+
+
+ stream tot bandwidth (MB/s): 12645.60
+ stream min bandwidth (MB/s): 6288.10 [gsgp61]
+ stream max bandwidth (MB/s): 6357.50 [gsgp62]
+
+Netperf bisection bandwidth test
+gsgp61 -> gsgp62 = 112.340000
+gsgp62 -> gsgp61 = 112.350000
+
+Summary:
+sum = 224.69 MB/sec
+min = 112.34 MB/sec
+max = 112.35 MB/sec
+avg = 112.34 MB/sec
+median = 112.35 MB/sec
+
+[gpadmin@gsgp60 gpcheckperfTest]$ 
+
+```
+

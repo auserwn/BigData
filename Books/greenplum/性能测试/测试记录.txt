@@ -1,0 +1,99 @@
+  569  nohup pgbench -c 500 -T 200 -r pgbench > file-500.out  2>&1
+  570  ls
+  571  vi file-500.out 
+  572  rm -rf file-500.out 
+  573  nohup pgbench -c 450 -T 200 -r pgbench > file-450.out  2>&1
+  574  ls
+  575  vi file-450.out 
+  576  nohup pgbench -c 350 -T 200 -r pgbench > file-450.out  2>&1
+  577  ls
+  578  vi file-450.out 
+  579  nohup pgbench -c 390 -T 200 -r pgbench > file-390.out  2>&1
+  580  ls
+  581  vi file-390.out 
+  582  history
+  583  nohup pgbench -c 360 -T 200 -r pgbench > file-360.out  2>&1
+  584  nohup pgbench -c 300 -s 10 -T 600 -r pgbench > file-360.out  2>&1
+  585  ls
+  586  vi file-360.out
+  587  nohup pgbench -c 300 -s 50 -T 600 -r pgbench > file-360-2.out  2>&1
+  588  nohup pgbench -c 300 -s 50 -j 20 -T 600 -r pgbench > file-360-3.out  2>&1
+  589  lks
+  590  ls
+  591  vi file-360-3.out
+  592  df -h
+  593  ls
+  594  gpstop
+  595  gpstart
+  596  ls
+  597  history
+  598  nohup pgbench -c 300 -s 50 -j 16 -T 600 -r pgbench > file-360-4.out  2>&1
+  599  ls
+  600  nohup pgbench -c 300 -s 50 -j 16 -T 600 -r pgbench > file-360-4.out  2>&1
+  601  vi file-360-4.out
+  602  nohup pgbench -c 320 -s 50 -j 16 -T 600 -r pgbench > file-360-4.out  2>&1
+  603  ls
+  604  vi file-360-4.out
+  605  nohup pgbench -c 320 -s 50 -j 16 -T 60 -r pgbench > file-360-5.out  2>&1
+  606  vi file-360-5.out
+  607  pgbench -i -s 1000 pgbench
+  608  nohup pgbench -c 320 -j 16 -T 600 -r pgbench > file-320-1.out  2>&1
+  609  ls
+  610  vi file-320-1.out
+  611  nohup pgbench -c 32 -j 16 -T 300 -r 100 -d pgbench > file-32-1.out  2>&1
+  612  vi file-32-1.out
+  613  pgbench -help
+  614  pgbench --help
+  615* nohup pgbench -c 32 -j 16 -T 300 -r pgbench > file-32-1.out  2>&1
+  616  vi file-32-1.out  2>&1
+  617  history
+  618  nohup pgbench -c 300 -s 50 -j 20 -T 600 -r pgbench > file-360-3.out  2>&1
+  619  nohup pgbench -c 32 -j 16 -T 600 -r pgbench > file-2.out  2>&1
+  620  nohup pgbench -c 32 -j 16 -T 120 -r pgbench > file-2-1.out  2>&1
+  621  vi file-2-1.out
+  622  nohup pgbench -c 32 -j 16 -T 300 -r pgbench > file-3-1.out  2>&1
+  623  vi file-3-1.out  2>&1
+  624  ls
+  625  nohup pgbench -c 300 -j 15 -S -T 300 -r pgbench > file-4-1.out  2>&1
+  626  vi file-4-1.out 
+  627  ls
+  628  vi file-390.out
+  629  file-320-1.out
+  630  vi file-320-1.out
+  631  vi file-4-1.out 
+  632  nohup pgbench -c 200 -j 15 -S -T 300 -r pgbench > file-4-1.out  2>&1
+  633  nohup pgbench -c 225 -j 15 -S -T 300 -r pgbench > file-4-1.out  2>&1
+  634  ls
+  635  vi file-4-1.out
+  636  nohup pgbench -c 240 -j 20 -S -T 300 -r pgbench > file-4-2.out  2>&1
+  637  nohup pgbench -c 200 -j 20 -S -T 300 -r pgbench > file-4-2.out  2>&1
+  638  vi file-4-2.out  2>&1
+  639  history
+  640  nohup pgbench -c 200 -j 64 -S -T 300 -r pgbench > file-4-3.out  2>&1
+  641  nohup pgbench -c 192 -j 64 -S -T 300 -r pgbench > file-4-3.out  2>&1
+  642  vi file-4-3.out
+  643  nohup pgbench -c 256 -j 256 -S -T 300 -r pgbench > file-4-4.out  2>&1
+  644  vi file-4-4.out 
+  645  ls -ltr
+  646  nohup pgbench -c 256 -j 512 -T 300 -r pgbench > file-4-5.out  2>&1
+  647  vi file-4-5.out
+  648  nohup pgbench -j 512 -T 300 -r pgbench > file-4-5.out  2>&1
+  649  vi file-4-5.out
+  650  nohup pgbench -c 1 -j 512 -T 300 -r pgbench > file-4-5.out  2>&1
+  651  nohup pgbench -c 512 -j 256 -T 300 -r pgbench > file-4-5.out  2>&1
+  652  vi file-4-5.out
+  653  history
+  654  nohup pgbench -c 192 -j 64 -S -T 300 -r pgbench > file-5-1.out  2>&1
+  655  vi file-5-1.out
+  656  nohup pgbench -c 512 -j 512 -S -T 300 -r pgbench > file-6-1.out  2>&1
+  657  vi file-6-1.out 
+  658  nohup pgbench -c 300 -j 300 -S -T 300 -r pgbench > file-6-2.out  2>&1
+  659  vi file-6-2.out
+  660  nohup pgbench -c 50 -j 50 -C -T 120 -r pgbench > file-7-1.out  2>&1
+  661  vi file-7-1.out
+  662  nohup pgbench -c 100 -j 100 -C -T 120 -r pgbench > file-7-1.out  2>&1
+  663  nohup pgbench -c 100 -j 100 -C -T 120 -r pgbench > file-7-2.out  2>&1
+  664  vi file-7-2.out 
+  665  nohup pgbench -c 300 -j 300 -S -T 120 -r pgbench > file-7-3.out  2>&1
+  666  vi file-7-3.out
+  667  nohup pgbench -c 400 -j 400 -S -T 120 -r pgbench > file-7-4.out  2>&1
