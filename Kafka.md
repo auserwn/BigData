@@ -142,7 +142,7 @@ sender线程发送的条件：到达batch.size或者linger.ms
 
 以下是**同步/异步**的处理流程
 
-![](D:\study\image\Kafka_image\k_1_4.png)
+![](image\Kafka_image\k_1_4.png)
 
 
 
@@ -290,7 +290,7 @@ public class CustomProducerSync {
 - 拦截器在生产中主要通过flume实现
 - 序列化器，由于生产中消息通常为String
 
-![](D:\study\image\Kafka_image\k_1_6.png)
+![](image\Kafka_image\k_1_6.png)
 
 分区器的**好处**：
 
